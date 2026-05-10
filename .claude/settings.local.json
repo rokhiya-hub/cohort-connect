@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx vite *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Rokhiya\\\\Desktop\\\\ProjectSpace\\\\cohort-connect\" -Recurse -File | Where-Object { $_.FullName -notmatch 'node_modules|dist|\\\\.git' } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Rokhiya\\\\Desktop\\\\ProjectSpace\\\\cohort-connect\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"DIR\"}else{\"FILE\"}}} | Sort-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Rokhiya\\\\Desktop\\\\ProjectSpace\\\\cohort-connect\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { $_.FullName })"
+    ]
+  }
+}

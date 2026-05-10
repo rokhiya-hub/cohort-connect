@@ -1,0 +1,205 @@
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import Avatar from '../common/Avatar';
+
+const menuItems = [
+  { path: '/home', label: 'Home', emoji: '🏠' },
+  { path: '/videos', label: 'Video Feed', emoji: '🎬', badge: true },
+  { path: '/my-videos', label: 'My Videos', emoji: '📁' },
+  { path: '/upload', label: 'Upload', emoji: '📤' },
+];
+
+const categories = [
+  { path: '/videos', label: 'All Videos', emoji: '⚡' },
+  { path: '/videos?category=interviews', label: 'Interviews', emoji: '💼' },
+  { path: '/videos?category=internships', label: 'Internships', emoji: '🚀' },
+  { path: '/videos?category=exam-prep', label: 'Exam Prep', emoji: '📝' },
+  { path: '/videos?category=resources', label: 'Resources', emoji: '📚' },
+  { path: '/videos?category=events', label: 'Events', emoji: '🎉' },
+  { path: '/videos?category=tech-ai', label: 'Tech & AI', emoji: '🤖' },
+];
+
+const connectItems = [
+  { path: '/connect', label: 'Find Mentors', emoji: '👥' },
+  { path: '/messages', label: 'Messages', emoji: '💬', badgeKey: 'messages' },
+  { path: '/groups', label: 'Study Groups', emoji: '📖' },
+  { path: '/doubts', label: 'Ask a Doubt', emoji: '❓' },
+];
+
+const platformItems = [
+  { path: '/feed', label: 'Social Feed', emoji: '📢' },
+  { path: '/leaderboard', label: 'Leaderboard', emoji: '🏆' },
+  { path: '/ai-studio', label: 'AI Studio', emoji: '✨' },
+];
+
+function SidebarItem({ path, label, emoji, badge, onClick }) {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const pathPart = path.split('?')[0];
+  const queryPart = path.includes('?') ? new URLSearchParams(path.split('?')[1]) : null;
+
+  let active = false;
+  if (queryPart) {
+    const catParam = queryPart.get('category');
+    active = location.pathname === pathPart && searchParams.get('category') === catParam;
+  } else if (path === '/videos') {
+    // "All Videos" — active when on /videos with no category filter
+    active = location.pathname === '/videos' && !searchParams.get('category');
+  } else {
+    active =
+      location.pathname === path ||
+      (path !== '/home' && path !== '/feed' && path !== '/' &&
+        location.pathname.startsWith(pathPart));
+  }
+
+  return (
+    <Link
+      to={path}
+      onClick={onClick}
+      className={`flex items-center justify-between px-3 py-2.5 rounded-xl mx-2 transition-all duration-150 group ${
+        active
+          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+          : 'text-gray-400 hover:text-white hover:bg-gray-800/70'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-lg leading-none select-none">{emoji}</span>
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+      {badge && (
+        <span className="bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[22px] text-center leading-none">
+          6
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest px-5 mb-1.5 mt-1">
+      {children}
+    </p>
+  );
+}
+
+export default function Sidebar({ isOpen, onClose }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden backdrop-blur-sm"
+          onClick={onClose}
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 h-full z-40 w-64 flex flex-col bg-gray-900 border-r border-gray-800/60
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Header / Logo */}
+        <div className="flex items-center gap-3 px-5 py-[18px] border-b border-gray-800/60 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
+            <span className="text-white font-bold text-sm">CC</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-bold text-[15px] leading-tight">CohortConnect</p>
+            <p className="text-gray-500 text-xs capitalize truncate">{user?.role} account</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="lg:hidden text-gray-500 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Scrollable nav */}
+        <div className="flex-1 overflow-y-auto py-4 space-y-5">
+          {/* MENU */}
+          <div>
+            <SectionLabel>Menu</SectionLabel>
+            <nav className="space-y-0.5">
+              {menuItems.map((item) => (
+                <SidebarItem key={item.path} {...item} onClick={onClose} />
+              ))}
+            </nav>
+          </div>
+
+          {/* CATEGORIES */}
+          <div>
+            <SectionLabel>Categories</SectionLabel>
+            <nav className="space-y-0.5">
+              {categories.map((item) => (
+                <SidebarItem key={item.path} {...item} onClick={onClose} />
+              ))}
+            </nav>
+          </div>
+
+          {/* CONNECT */}
+          <div>
+            <SectionLabel>Connect</SectionLabel>
+            <nav className="space-y-0.5">
+              {connectItems.map((item) => (
+                <SidebarItem key={item.path} {...item} onClick={onClose} />
+              ))}
+            </nav>
+          </div>
+
+          {/* PLATFORM */}
+          <div>
+            <SectionLabel>Platform</SectionLabel>
+            <nav className="space-y-0.5">
+              {platformItems.map((item) => (
+                <SidebarItem key={item.path} {...item} onClick={onClose} />
+              ))}
+              {user?.role === 'admin' && (
+                <SidebarItem path="/admin" label="Admin Panel" emoji="⚙️" onClick={onClose} />
+              )}
+            </nav>
+          </div>
+        </div>
+
+        {/* Bottom: profile + logout */}
+        <div className="border-t border-gray-800/60 p-4 flex-shrink-0">
+          <Link
+            to="/profile"
+            onClick={onClose}
+            className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-800/60 transition-colors mb-2 group"
+          >
+            <Avatar src={user?.profilePicture} name={user?.fullName} size="sm" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate leading-tight">{user?.fullName}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+            </div>
+            <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          >
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+}
