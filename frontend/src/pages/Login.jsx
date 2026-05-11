@@ -27,37 +27,38 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center px-4">
       <Link to="/" className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white text-lg">CC</div>
-        <span className="font-bold text-xl text-white">CohortConnect</span>
+        <div className="w-60 h-25 rounded-xl ">
+        <img src="/logo.png" alt="CohortConnect logo" />
+        </div>
       </Link>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-white mb-2">Welcome back</h1>
-        <p className="text-gray-400 text-sm mb-6">Sign in to your account</p>
+      <div className="bg-white border border-blue-200 rounded-2xl p-8 w-full max-w-md shadow-lg shadow-blue-500/10">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
+        <p className="text-gray-600 text-sm mb-6">Sign in to your account</p>
 
         {error && (
-          <div className="bg-red-900/30 border border-red-700/50 rounded-xl px-4 py-3 mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">College Email</label>
+            <label className="block text-sm text-gray-700 font-medium mb-1.5">College Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@acet.ac.in"
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
             />
             <p className="text-xs text-gray-500 mt-1">Must be from your institution's domain</p>
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Password</label>
+            <label className="block text-sm text-gray-700 font-medium mb-1.5">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -65,12 +66,12 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 transition-colors p-1"
                 title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
@@ -90,7 +91,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors mt-6"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold rounded-xl transition-all mt-6 shadow-md shadow-blue-500/20"
           >
             {loading && <Spinner size="sm" />}
             {loading ? 'Signing in...' : 'Sign In'}

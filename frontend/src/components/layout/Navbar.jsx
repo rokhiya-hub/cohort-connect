@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../common/Avatar';
@@ -12,21 +13,38 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('all'); // 'all', 'user', 'category'
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    
+    if (searchType === 'user') {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}&type=user`);
+    } else if (searchType === 'category') {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}&type=category`);
+    } else {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+    setSearchQuery('');
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 bg-gray-950/95 backdrop-blur-md border-b border-gray-800">
+    <nav className="fixed top-0 left-0 right-0 z-40 bg-blue-50/95 backdrop-blur-md border-b border-blue-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/feed" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CC</span>
+          <Link to="/feed" className="flex items-center gap-3" aria-label="CohortConnect home">
+            <img src="/logo.png" alt="CohortConnect logo" className="w-10 h-10 rounded-2xl bg-white shadow-sm object-cover" />
+            <div className="flex items-baseline gap-1">
+              <span className="text-slate-900 font-bold text-lg leading-none">Cohort</span>
+              <span className="text-cyan-600 font-bold text-lg leading-none">Connect</span>
             </div>
-            <span className="text-white font-bold text-lg hidden sm:block">CohortConnect</span>
           </Link>
 
           <div className="flex items-center gap-1">
@@ -36,8 +54,8 @@ export default function Navbar() {
                 to={item.path}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   location.pathname === item.path
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-blue-100'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +68,7 @@ export default function Navbar() {
               <Link
                 to="/admin"
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === '/admin' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  location.pathname === '/admin' ? 'bg-red-600 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-blue-100'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,17 +79,40 @@ export default function Navbar() {
             )}
           </div>
 
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2 bg-white border border-blue-200 rounded-lg px-3 py-2">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search users, posts..."
+              className="bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none w-40"
+            />
+            <select
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="bg-blue-50 text-xs text-gray-700 rounded px-2 py-1 border border-blue-200 focus:outline-none cursor-pointer hover:bg-blue-100"
+            >
+              <option value="all">All</option>
+              <option value="user">Users</option>
+              <option value="category">Category</option>
+            </select>
+          </form>
+
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-white leading-none">{user?.fullName}</p>
-              <p className="text-xs text-purple-400 capitalize">{user?.role}</p>
+              <p className="text-sm font-medium text-gray-900 leading-none">{user?.fullName}</p>
+              <p className="text-xs text-blue-600 capitalize">{user?.role}</p>
             </div>
             <Link to="/profile" className="flex items-center gap-2 group">
               <Avatar src={user?.profilePicture} name={user?.fullName} size="sm" />
             </Link>
             <button
               onClick={handleLogout}
-              className="text-gray-400 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-gray-800"
+              className="text-gray-600 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-blue-100"
               title="Logout"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -2,11 +2,121 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
+const Video = require('../models/Video');
 const User = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');
 const { addUserPoints } = require('../utils/points');
 
 const router = express.Router();
+
+// GET /api/posts/saved — user's saved posts
+router.get('/saved', protect, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  try {
+    const user = await User.findById(req.user._id).populate('savedPosts');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const savedPosts = user.savedPosts || [];
+    const total = savedPosts.length;
+    const paginatedPosts = savedPosts.slice(skip, skip + limit);
+
+    const enriched = await Promise.all(
+      paginatedPosts.map(async (post) => {
+        if (!post || post.isRemoved) return null;
+        await post.populate('author', 'fullName username profilePicture role');
+        const commentCount = await Comment.countDocuments({ post: post._id, isRemoved: false });
+        const obj = post.toObject();
+        obj.isLiked = post.likes.map((l) => l.toString()).includes(req.user._id.toString());
+        obj.isSaved = true;
+        obj.likeCount = post.likes.length;
+        obj.saveCount = post.savedBy.length;
+        obj.commentCount = commentCount;
+        return obj;
+      })
+    );
+
+    res.json({
+      posts: enriched.filter(p => p !== null),
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/posts/feed/unified — paginated unified feed with posts and videos
+router.get('/feed/unified', protect, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  try {
+    // Fetch posts
+    const posts = await Post.find({ isRemoved: false })
+      .populate('author', 'fullName username profilePicture role')
+      .select('+likes +savedBy')
+      .lean();
+
+    // Fetch videos
+    let videos = [];
+    try {
+      videos = await Video.find()
+        .populate('author', 'fullName username profilePicture role')
+        .select('+likes +savedBy')
+        .lean();
+    } catch (e) {
+      console.log('Warning: Failed to fetch videos:', e.message);
+      videos = [];
+    }
+
+    // Combine and sort by createdAt
+    const combined = [];
+    posts.forEach(p => {
+      combined.push({ ...p, type: 'post' });
+    });
+    videos.forEach(v => {
+      combined.push({ ...v, type: 'video' });
+    });
+    combined.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Apply pagination
+    const total = combined.length;
+    const paginatedItems = combined.slice(skip, skip + limit);
+    const userId = req.user._id.toString();
+
+    // Enrich items with user-specific data
+    const enriched = [];
+    for (const item of paginatedItems) {
+      if (item.type === 'post') {
+        const commentCount = await Comment.countDocuments({ post: item._id, isRemoved: false });
+        enriched.push({
+          ...item,
+          isLiked: (item.likes || []).some(l => l.toString() === userId),
+          isSaved: (item.savedBy || []).some(s => s.toString() === userId),
+          likeCount: (item.likes || []).length,
+          saveCount: (item.savedBy || []).length,
+          commentCount
+        });
+      } else {
+        enriched.push({
+          ...item,
+          isLiked: (item.likes || []).some(l => l.toString() === userId),
+          isSaved: (item.savedBy || []).some(s => s.toString() === userId),
+          likeCount: (item.likes || []).length,
+          saveCount: (item.savedBy || []).length
+        });
+      }
+    }
+
+    res.json({ posts: enriched, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) {
+    console.error('Unified feed error:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // GET /api/posts — paginated feed
 router.get('/', protect, async (req, res) => {

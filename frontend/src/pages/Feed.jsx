@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/feed/PostCard';
+import VideoCard from '../components/feed/VideoCard';
 import PostCreator from '../components/feed/PostCreator';
 import Spinner from '../components/common/Spinner';
 
@@ -19,7 +20,7 @@ export default function Feed() {
 
   const fetchPosts = useCallback(async (pageNum = 1) => {
     try {
-      const res = await api.get(`/posts?page=${pageNum}&limit=10`);
+      const res = await api.get(`/posts/feed/unified?page=${pageNum}&limit=10`);
       const { posts: newPosts, pages } = res.data;
       if (pageNum === 1) {
         setPosts(newPosts);
@@ -27,8 +28,21 @@ export default function Feed() {
         setPosts((prev) => [...prev, ...newPosts]);
       }
       setHasMore(pageNum < pages);
-    } catch {
-      setError('Failed to load posts. Make sure the backend is running.');
+      setError('');
+    } catch (err) {
+      // Fallback to regular posts endpoint if unified feed fails
+      try {
+        const res = await api.get(`/posts?page=${pageNum}&limit=10`);
+        const { posts: newPosts, pages } = res.data;
+        if (pageNum === 1) {
+          setPosts(newPosts);
+        } else {
+          setPosts((prev) => [...prev, ...newPosts]);
+        }
+        setHasMore(pageNum < pages);
+      } catch {
+        setError('Failed to load posts. Make sure the backend is running.');
+      }
     }
   }, []);
 
@@ -105,14 +119,24 @@ export default function Feed() {
             </div>
           ) : (
             <div className="space-y-4">
-              {posts.map((post) => (
-                <PostCard
-                  key={post._id}
-                  post={post}
-                  currentUser={user}
-                  onDelete={handleDeletePost}
-                  onUpdate={handleUpdatePost}
-                />
+              {posts.map((item) => (
+                item.type === 'video' ? (
+                  <VideoCard
+                    key={item._id}
+                    video={item}
+                    currentUser={user}
+                    onDelete={handleDeletePost}
+                    onUpdate={handleUpdatePost}
+                  />
+                ) : (
+                  <PostCard
+                    key={item._id}
+                    post={item}
+                    currentUser={user}
+                    onDelete={handleDeletePost}
+                    onUpdate={handleUpdatePost}
+                  />
+                )
               ))}
 
               {hasMore && (

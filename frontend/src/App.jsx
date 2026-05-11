@@ -11,6 +11,7 @@ import AdminPanel from './pages/AdminPanel';
 import Home from './pages/Home';
 import Categories from './pages/Categories';
 import MyPosts from './pages/MyPosts';
+import Saved from './pages/Saved';
 import VideoFeed from './pages/VideoFeed';
 import VideoUpload from './pages/VideoUpload';
 import Connect from './pages/Connect';
@@ -56,6 +57,7 @@ function AppRoutes() {
       <Route path="/home" element={<P><Feed /></P>} />
       <Route path="/feed" element={<P><Feed /></P>} />
       <Route path="/my-posts" element={<P><MyPosts /></P>} />
+      <Route path="/saved" element={<P><Saved /></P>} />
       <Route path="/categories" element={<P><Categories /></P>} />
       <Route path="/profile" element={<P><Profile /></P>} />
       <Route path="/profile/:id" element={<P><Profile /></P>} />

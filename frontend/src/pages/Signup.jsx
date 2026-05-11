@@ -30,15 +30,17 @@ const COLLEGE_NAMES = Object.keys(COLLEGE_MAPPING);
 function Field({ label, name, type = 'text', placeholder, required, form, errors, set, subText }) {
   return (
     <div>
-      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'}</label>
+      <label className="block text-sm text-gray-700 font-medium mb-1.5">{label}{required && ' *'}</label>
       <input
         type={type}
         value={form[name]}
         onChange={(e) => set(name, e.target.value)}
         placeholder={placeholder}
-        className={`w-full bg-gray-800 border rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none transition-colors ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+        className={`w-full bg-blue-50 border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all ${
+          errors[name] ? 'border-red-400 focus:border-red-500' : 'border-blue-200 focus:border-blue-500'
+        }`}
       />
-      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+      {errors[name] && <p className="text-red-600 text-xs mt-1">{errors[name]}</p>}
       {subText && !errors[name] && <p className="text-xs text-gray-500 mt-1">{subText}</p>}
     </div>
   );
@@ -48,20 +50,22 @@ function PasswordField({ label, name, placeholder, required, form, errors, set, 
   const isPasswordField = name === 'password';
   return (
     <div>
-      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'}</label>
+      <label className="block text-sm text-gray-700 font-medium mb-1.5">{label}{required && ' *'}</label>
       <div className="relative">
         <input
           type={showPassword[name] ? 'text' : 'password'}
           value={form[name]}
           onChange={(e) => set(name, e.target.value)}
           placeholder={placeholder}
-          className={`w-full bg-gray-800 border rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none transition-colors ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+          className={`w-full bg-blue-50 border rounded-xl px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all ${
+            errors[name] ? 'border-red-400 focus:border-red-500' : 'border-blue-200 focus:border-blue-500'
+          }`}
         />
         {isPasswordField && (
           <button
             type="button"
             onClick={() => setShowPassword({ ...showPassword, [name]: !showPassword[name] })}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 transition-colors p-1"
             title={showPassword[name] ? 'Hide password' : 'Show password'}
           >
             {showPassword[name] ? (
@@ -77,14 +81,14 @@ function PasswordField({ label, name, placeholder, required, form, errors, set, 
           </button>
         )}
       </div>
-      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+      {errors[name] && <p className="text-red-600 text-xs mt-1">{errors[name]}</p>}
       {!errors[name] && name === 'password' && (
-        <div className="text-xs text-gray-500 mt-2 space-y-1">
-          <div className={form.password.length >= 8 ? 'text-green-400' : 'text-gray-500'}>✓ At least 8 characters</div>
-          <div className={/[a-z]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Lowercase letter</div>
-          <div className={/[A-Z]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Uppercase letter</div>
-          <div className={/[0-9]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Number</div>
-          <div className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Special character</div>
+        <div className="text-xs text-gray-600 mt-2 space-y-1">
+          <div className={form.password.length >= 8 ? 'text-green-600 font-medium' : 'text-gray-500'}>✓ At least 8 characters</div>
+          <div className={/[a-z]/.test(form.password) ? 'text-green-600 font-medium' : 'text-gray-500'}>✓ Lowercase letter</div>
+          <div className={/[A-Z]/.test(form.password) ? 'text-green-600 font-medium' : 'text-gray-500'}>✓ Uppercase letter</div>
+          <div className={/[0-9]/.test(form.password) ? 'text-green-600 font-medium' : 'text-gray-500'}>✓ Number</div>
+          <div className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password) ? 'text-green-600 font-medium' : 'text-gray-500'}>✓ Special character</div>
         </div>
       )}
     </div>
@@ -94,18 +98,20 @@ function PasswordField({ label, name, placeholder, required, form, errors, set, 
 function SelectField({ label, name, options, required, form, errors, set }) {
   return (
     <div>
-      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'}</label>
+      <label className="block text-sm text-gray-700 font-medium mb-1.5">{label}{required && ' *'}</label>
       <select
         value={form[name]}
         onChange={(e) => set(name, e.target.value)}
-        className={`w-full bg-gray-800 border rounded-xl px-4 py-3 text-white text-sm focus:outline-none transition-colors ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+        className={`w-full bg-blue-50 border rounded-xl px-4 py-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all ${
+          errors[name] ? 'border-red-400 focus:border-red-500' : 'border-blue-200 focus:border-blue-500'
+        }`}
       >
         <option value="">Select {label.toLowerCase()}</option>
         {options.map((opt) => (
           <option key={opt.value || opt} value={opt.value || opt}>{opt.label || opt}</option>
         ))}
       </select>
-      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+      {errors[name] && <p className="text-red-600 text-xs mt-1">{errors[name]}</p>}
     </div>
   );
 }
@@ -114,16 +120,18 @@ function TextAreaField({ label, name, placeholder, required, form, errors, set, 
   const charCount = form[name]?.length || 0;
   return (
     <div>
-      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'} {maxChars && `(${charCount}/${maxChars})`}</label>
+      <label className="block text-sm text-gray-700 font-medium mb-1.5">{label}{required && ' *'} {maxChars && `(${charCount}/${maxChars})`}</label>
       <textarea
         value={form[name]}
         onChange={(e) => set(name, e.target.value.slice(0, maxChars))}
         placeholder={placeholder}
         maxLength={maxChars}
-        className={`w-full bg-gray-800 border rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none transition-colors resize-none ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+        className={`w-full bg-blue-50 border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all resize-none ${
+          errors[name] ? 'border-red-400 focus:border-red-500' : 'border-blue-200 focus:border-blue-500'
+        }`}
         rows="3"
       />
-      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+      {errors[name] && <p className="text-red-600 text-xs mt-1">{errors[name]}</p>}
     </div>
   );
 }
@@ -270,33 +278,34 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center px-4 py-8">
       <Link to="/" className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white text-lg">CC</div>
-        <span className="font-bold text-xl text-white">CohortConnect</span>
+        <div className="w-60 h-25 rounded-xl ">
+        <img src="/logo.png" alt="CohortConnect logo" />
+        </div>
       </Link>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white border border-blue-200 rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg shadow-blue-500/10">
         {step === 1 ? (
           <>
-            <h1 className="text-2xl font-bold text-white mb-2">Create your account</h1>
-            <p className="text-gray-400 text-sm mb-6">First, choose your role</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Create your account</h1>
+            <p className="text-gray-600 text-sm mb-6">First, choose your role</p>
             <div className="space-y-3 mb-6">
               {ROLES.map((r) => (
                 <button
                   key={r.value}
                   onClick={() => setRole(r.value)}
                   className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left ${
-                    role === r.value ? 'border-purple-500 bg-purple-900/20' : 'border-gray-700 hover:border-gray-600 bg-gray-800'
+                    role === r.value ? 'border-blue-400 bg-blue-100 shadow-md shadow-blue-200' : 'border-blue-200 hover:border-blue-300 bg-blue-50 hover:bg-white'
                   }`}
                 >
                   <span className="text-3xl">{r.emoji}</span>
                   <div>
-                    <p className="font-semibold text-white">{r.label}</p>
-                    <p className="text-xs text-gray-400">{r.desc}</p>
+                    <p className="font-semibold text-gray-900">{r.label}</p>
+                    <p className="text-xs text-gray-600">{r.desc}</p>
                   </div>
                   {role === r.value && (
-                    <svg className="w-5 h-5 text-purple-400 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-blue-600 ml-auto" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   )}
@@ -306,7 +315,7 @@ export default function Signup() {
             <button
               onClick={() => role && setStep(2)}
               disabled={!role}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-all shadow-md shadow-blue-500/20"
             >
               Continue as {role ? ROLES.find((r) => r.value === role)?.label : '...'}
             </button>
@@ -314,20 +323,20 @@ export default function Signup() {
         ) : (
           <>
             <div className="flex items-center gap-3 mb-6">
-              <button onClick={() => setStep(1)} className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-gray-800">
+              <button onClick={() => setStep(1)} className="text-gray-600 hover:text-gray-900 transition-colors p-1 rounded-lg hover:bg-blue-100">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">Complete Your Profile</h1>
-                <p className="text-sm text-gray-400">Registering as <span className="text-purple-400 capitalize">{role}</span></p>
+                <h1 className="text-2xl font-bold text-gray-900">Complete Your Profile</h1>
+                <p className="text-sm text-gray-600">Registering as <span className="text-blue-600 capitalize font-medium">{role}</span></p>
               </div>
             </div>
 
             {apiError && (
-              <div className="bg-red-900/30 border border-red-700/50 rounded-xl px-4 py-3 mb-4">
-                <p className="text-red-400 text-sm">{apiError}</p>
+              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                <p className="text-red-600 text-sm">{apiError}</p>
               </div>
             )}
 
@@ -459,7 +468,7 @@ export default function Signup() {
                   />
 
                   <div className="space-y-3">
-                    <label className="block text-sm text-gray-400 mb-3">Student Type *</label>
+                    <label className="block text-sm text-gray-700 font-medium mb-3">Student Type *</label>
                     <div className="grid grid-cols-2 gap-3">
                       {['Junior', 'Senior'].map((type) => (
                         <button
@@ -467,15 +476,15 @@ export default function Signup() {
                           type="button"
                           onClick={() => set('studentType', type)}
                           className={`p-3 rounded-xl border transition-all text-center ${
-                            form.studentType === type ? 'border-purple-500 bg-purple-900/20' : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                            form.studentType === type ? 'border-blue-400 bg-blue-100 shadow-md shadow-blue-200' : 'border-blue-200 bg-blue-50 hover:border-blue-300 hover:bg-white'
                           }`}
                         >
-                          <p className="text-white font-semibold">{type}</p>
-                          <p className="text-xs text-gray-400">{type === 'Junior' ? '1st-2nd Year' : '3rd-4th Year'}</p>
+                          <p className="text-gray-900 font-semibold">{type}</p>
+                          <p className="text-xs text-gray-600">{type === 'Junior' ? '1st-2nd Year' : '3rd-4th Year'}</p>
                         </button>
                       ))}
                     </div>
-                    {errors.studentType && <p className="text-red-400 text-xs">{errors.studentType}</p>}
+                    {errors.studentType && <p className="text-red-600 text-xs">{errors.studentType}</p>}
                   </div>
 
                   <TextAreaField
@@ -518,7 +527,7 @@ export default function Signup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors mt-6"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold rounded-xl transition-all mt-6 shadow-md shadow-blue-500/20"
               >
                 {loading && <Spinner size="sm" />}
                 {loading ? 'Creating account...' : 'Create Account'}
@@ -527,9 +536,9 @@ export default function Signup() {
           </>
         )}
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{' '}
-          <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium">Sign in</Link>
+          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">Sign in</Link>
         </p>
       </div>
     </div>

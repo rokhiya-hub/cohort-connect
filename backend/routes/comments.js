@@ -1,6 +1,7 @@
 const express = require('express');
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
+const Video = require('../models/Video');
 const { protect } = require('../middleware/auth');
 const { addUserPoints } = require('../utils/points');
 
@@ -15,9 +16,11 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
     if (!comment.isRemoved) {
-      const post = await Post.findById(comment.post);
-      if (post) {
-        await addUserPoints(post.author, -3);
+      if (comment.post) {
+        const post = await Post.findById(comment.post);
+        if (post) {
+          await addUserPoints(post.author, -3);
+        }
       }
     }
     comment.isRemoved = true;
