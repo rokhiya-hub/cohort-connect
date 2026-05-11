@@ -34,7 +34,7 @@ export default function Leaderboard() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">Leaderboard</h1>
+        <h1 className="text-2xl font-bold text-cyan-300 mb-1">Leaderboard</h1>
         <p className="text-gray-400 text-sm">Top contributors ranked by engagement & quality</p>
       </div>
 

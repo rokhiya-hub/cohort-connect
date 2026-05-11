@@ -122,11 +122,10 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="px-5 py-5 border-b border-blue-200 flex flex-col gap-4 flex-shrink-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-30 rounded-xl ">
-                <img src="/logo.png" alt="CohortConnect logo" />
+              <div className="w-36 h-36 rounded-xl">
+                <img src="/logo.png" alt="CohortConnect logo" className="w-full h-full object-contain" />
               </div>
               <div className="min-w-0">
-                <p className="text-gray-900 font-bold text-[15px] leading-tight">CohortConnect</p>
                 <p className="text-gray-600 text-xs capitalize truncate">{user?.role} account</p>
               </div>
             </div>

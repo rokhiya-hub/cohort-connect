@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import Avatar from '../components/common/Avatar';
@@ -77,7 +78,9 @@ export default function Messages() {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
-  const pollRef = useRef(null);
+  const socketRef = useRef(null);
+  const activeConvIdRef = useRef(activeConvId);
+  const lastJoinedConvRef = useRef(null);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -105,21 +108,76 @@ export default function Messages() {
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+  }, [fetchConversations]);
+
+  useEffect(() => {
+    activeConvIdRef.current = activeConvId;
+  }, [activeConvId]);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const socketUrl = apiUrl.replace(/\/api\/?$/, '') || 'http://localhost:5000';
+    const socket = io(socketUrl, {
+      auth: { token: localStorage.getItem('token') },
+      transports: ['websocket'],
+    });
+
+    socketRef.current = socket;
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connect error', error);
+    });
+
+    socket.on('message:new', (payload) => {
+      if (!payload?.conversationId || payload.conversationId !== activeConvIdRef.current) return;
+      if (payload.message?.sender?._id === user?._id) return;
+      setMessages((prev) => [...prev, payload.message]);
+    });
+
+    socket.on('conversation:updated', () => {
+      fetchConversations();
+      if (activeConvIdRef.current) {
+        fetchMessages(activeConvIdRef.current);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [user, fetchConversations, fetchMessages]);
+
+  useEffect(() => {
+    if (!activeConvId || !socketRef.current) return undefined;
+
+    socketRef.current.emit('joinConversation', activeConvId, (response) => {
+      if (!response?.success) {
+        console.warn('Could not join conversation', response?.message);
+      }
+    });
+
+    const previousConv = lastJoinedConvRef.current;
+    if (previousConv && previousConv !== activeConvId) {
+      socketRef.current.emit('leaveConversation', previousConv);
+    }
+    lastJoinedConvRef.current = activeConvId;
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.emit('leaveConversation', activeConvId);
+      }
+    };
+  }, [activeConvId]);
 
   useEffect(() => {
     if (activeConvId) {
       fetchMessages(activeConvId);
       const conv = conversations.find((c) => c._id === activeConvId);
       if (conv) setActiveConv(conv);
-
-      clearInterval(pollRef.current);
-      pollRef.current = setInterval(() => {
-        fetchMessages(activeConvId);
-      }, 4000);
     }
-    return () => clearInterval(pollRef.current);
-  }, [activeConvId, conversations]);
+  }, [activeConvId, conversations, fetchMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -155,7 +213,7 @@ export default function Messages() {
       {/* Sidebar: conversations list */}
       <div className={`flex-shrink-0 flex flex-col border-r border-gray-800 ${activeConvId ? 'hidden sm:flex w-72' : 'flex w-full sm:w-72'}`}>
         <div className="px-4 py-4 border-b border-gray-800">
-          <h2 className="text-white font-semibold text-base">Messages</h2>
+          <h2 className="text-cyan-300 font-semibold text-base">Messages</h2>
           <p className="text-gray-500 text-xs mt-0.5">Your conversations</p>
         </div>
         {loadingConvs ? (

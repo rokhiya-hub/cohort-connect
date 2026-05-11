@@ -16,8 +16,7 @@ export default function Landing() {
       <nav className="sticky top-0 z-50 border-b border-blue-200 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-white/70 shadow-sm">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-blue-500/30">CC</div>
-            <span className="font-bold text-xl text-gray-900">CohortConnect</span>
+            <img src="/logo.png" alt="CohortConnect logo" className="w-12 h-12 rounded-xl object-contain" />
           </div>
           <div className="flex items-center gap-3">
             <Link to="/login" className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-blue-100">

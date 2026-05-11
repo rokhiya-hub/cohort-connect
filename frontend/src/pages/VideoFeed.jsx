@@ -161,7 +161,7 @@ export default function VideoFeed() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white">Video Feed</h1>
+          <h1 className="text-2xl font-bold text-cyan-300">Video Feed</h1>
           <p className="text-gray-500 text-sm mt-0.5">Curated learning content from seniors & faculty</p>
         </div>
         <Link

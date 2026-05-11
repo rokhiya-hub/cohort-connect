@@ -113,7 +113,7 @@ export default function MyPosts() {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">My Posts</h1>
+        <h1 className="text-2xl font-bold text-cyan-300">My Posts</h1>
         <p className="text-gray-400 text-sm">All your shared posts, videos, and updates in one place.</p>
       </div>
 

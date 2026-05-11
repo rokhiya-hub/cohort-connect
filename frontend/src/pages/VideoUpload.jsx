@@ -522,7 +522,7 @@ export default function VideoUpload() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Upload Video</h1>
+        <h1 className="text-2xl font-bold text-cyan-300">Upload Video</h1>
         <p className="text-gray-500 text-sm mt-0.5">Share educational content or generate with AI</p>
       </div>
 
