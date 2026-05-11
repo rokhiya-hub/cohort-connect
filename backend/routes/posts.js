@@ -9,6 +9,18 @@ const { addUserPoints } = require('../utils/points');
 
 const router = express.Router();
 
+const computeTimeDecayScore = (createdAt) => {
+  const ageHours = Math.max((Date.now() - new Date(createdAt)) / 36e5, 0);
+  // Keep newer posts naturally boosted while preserving engagement signal.
+  return 50 / Math.pow(ageHours + 2, 1.25);
+};
+
+const computeFeedScore = ({ likeCount = 0, saveCount = 0, commentCount = 0, createdAt }) => {
+  const engagementScore = likeCount * 1.5 + saveCount * 2.5 + commentCount * 2;
+  const decayScore = computeTimeDecayScore(createdAt);
+  return engagementScore + decayScore;
+};
+
 // GET /api/posts/saved — user's saved posts
 router.get('/saved', protect, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -72,46 +84,37 @@ router.get('/feed/unified', protect, async (req, res) => {
       videos = [];
     }
 
-    // Combine and sort by createdAt
     const combined = [];
-    posts.forEach(p => {
-      combined.push({ ...p, type: 'post' });
-    });
-    videos.forEach(v => {
-      combined.push({ ...v, type: 'video' });
-    });
-    combined.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    posts.forEach(p => combined.push({ ...p, type: 'post' }));
+    videos.forEach(v => combined.push({ ...v, type: 'video' }));
 
-    // Apply pagination
-    const total = combined.length;
-    const paginatedItems = combined.slice(skip, skip + limit);
     const userId = req.user._id.toString();
+    const scoredItems = await Promise.all(combined.map(async (item) => {
+      const commentCount = item.type === 'post'
+        ? await Comment.countDocuments({ post: item._id, isRemoved: false })
+        : await Comment.countDocuments({ video: item._id, isRemoved: false });
 
-    // Enrich items with user-specific data
-    const enriched = [];
-    for (const item of paginatedItems) {
-      if (item.type === 'post') {
-        const commentCount = await Comment.countDocuments({ post: item._id, isRemoved: false });
-        enriched.push({
-          ...item,
-          isLiked: (item.likes || []).some(l => l.toString() === userId),
-          isSaved: (item.savedBy || []).some(s => s.toString() === userId),
-          likeCount: (item.likes || []).length,
-          saveCount: (item.savedBy || []).length,
-          commentCount
-        });
-      } else {
-        enriched.push({
-          ...item,
-          isLiked: (item.likes || []).some(l => l.toString() === userId),
-          isSaved: (item.savedBy || []).some(s => s.toString() === userId),
-          likeCount: (item.likes || []).length,
-          saveCount: (item.savedBy || []).length
-        });
-      }
-    }
+      const likeCount = (item.likes || []).length;
+      const saveCount = (item.savedBy || []).length;
+      const score = computeFeedScore({ likeCount, saveCount, commentCount, createdAt: item.createdAt });
 
-    res.json({ posts: enriched, total, page, pages: Math.ceil(total / limit) });
+      return {
+        ...item,
+        isLiked: (item.likes || []).some(l => l.toString() === userId),
+        isSaved: (item.savedBy || []).some(s => s.toString() === userId),
+        likeCount,
+        saveCount,
+        commentCount,
+        score,
+      };
+    }));
+
+    scoredItems.sort((a, b) => b.score - a.score);
+
+    const total = scoredItems.length;
+    const paginatedItems = scoredItems.slice(skip, skip + limit);
+
+    res.json({ posts: paginatedItems, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     console.error('Unified feed error:', err);
     res.status(500).json({ message: err.message });
@@ -124,29 +127,33 @@ router.get('/', protect, async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
   try {
-    const posts = await Post.find({ isRemoved: false })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('author', 'fullName username profilePicture role');
+    const allPosts = await Post.find({ isRemoved: false })
+      .populate('author', 'fullName username profilePicture role')
+      .select('+likes +savedBy')
+      .lean();
 
-    const total = await Post.countDocuments({ isRemoved: false });
     const userId = req.user._id.toString();
+    const scoredPosts = await Promise.all(allPosts.map(async (post) => {
+      const commentCount = await Comment.countDocuments({ post: post._id, isRemoved: false });
+      const likeCount = (post.likes || []).length;
+      const saveCount = (post.savedBy || []).length;
+      const score = computeFeedScore({ likeCount, saveCount, commentCount, createdAt: post.createdAt });
+      return {
+        ...post,
+        isLiked: (post.likes || []).some(l => l.toString() === userId),
+        isSaved: (post.savedBy || []).some(s => s.toString() === userId),
+        likeCount,
+        saveCount,
+        commentCount,
+        score,
+      };
+    }));
 
-    const enriched = await Promise.all(
-      posts.map(async (post) => {
-        const commentCount = await Comment.countDocuments({ post: post._id, isRemoved: false });
-        const obj = post.toObject();
-        obj.isLiked = post.likes.map((l) => l.toString()).includes(userId);
-        obj.isSaved = post.savedBy.map((s) => s.toString()).includes(userId);
-        obj.likeCount = post.likes.length;
-        obj.saveCount = post.savedBy.length;
-        obj.commentCount = commentCount;
-        return obj;
-      })
-    );
+    scoredPosts.sort((a, b) => b.score - a.score);
+    const total = scoredPosts.length;
+    const paginated = scoredPosts.slice(skip, skip + limit);
 
-    res.json({ posts: enriched, total, page, pages: Math.ceil(total / limit) });
+    res.json({ posts: paginated, total, page, pages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
