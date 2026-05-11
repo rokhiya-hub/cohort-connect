@@ -1,12 +1,13 @@
+import { useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../common/Avatar';
 
 const menuItems = [
   { path: '/home', label: 'Home', emoji: '🏠' },
-  { path: '/videos', label: 'Video Feed', emoji: '🎬', badge: true },
-  { path: '/my-videos', label: 'My Videos', emoji: '📁' },
+  { path: '/my-posts', label: 'My Posts', emoji: '📝' },
   { path: '/upload', label: 'Upload', emoji: '📤' },
+  { path: '/categories', label: 'Categories', emoji: '🗂️' },
 ];
 
 const categories = [
@@ -17,17 +18,17 @@ const categories = [
   { path: '/videos?category=resources', label: 'Resources', emoji: '📚' },
   { path: '/videos?category=events', label: 'Events', emoji: '🎉' },
   { path: '/videos?category=tech-ai', label: 'Tech & AI', emoji: '🤖' },
+  { path: '/videos?category=other', label: 'Other', emoji: '📌' },
 ];
 
 const connectItems = [
   { path: '/connect', label: 'Find Mentors', emoji: '👥' },
-  { path: '/messages', label: 'Messages', emoji: '💬', badgeKey: 'messages' },
+  { path: '/messages', label: 'Messages', emoji: '💬' },
   { path: '/groups', label: 'Study Groups', emoji: '📖' },
-  { path: '/doubts', label: 'Ask a Doubt', emoji: '❓' },
 ];
 
 const platformItems = [
-  { path: '/feed', label: 'Social Feed', emoji: '📢' },
+  { path: '/doubts', label: 'Ask a Doubt', emoji: '❓' },
   { path: '/leaderboard', label: 'Leaderboard', emoji: '🏆' },
   { path: '/ai-studio', label: 'AI Studio', emoji: '✨' },
 ];
@@ -87,10 +88,19 @@ function SectionLabel({ children }) {
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+    navigate(`/search?q=${encodeURIComponent(search.trim())}`);
+    setSearch('');
+    onClose();
   };
 
   return (
@@ -104,27 +114,43 @@ export default function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full z-40 w-64 flex flex-col bg-gray-900 border-r border-gray-800/60
+        className={`fixed top-0 left-0 h-full z-40 w-80 flex flex-col bg-gray-900 border-r border-gray-800/60
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Header / Logo */}
-        <div className="flex items-center gap-3 px-5 py-[18px] border-b border-gray-800/60 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
-            <span className="text-white font-bold text-sm">CC</span>
+        <div className="px-5 py-5 border-b border-gray-800/60 flex flex-col gap-4 flex-shrink-0">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <span className="text-white font-bold text-sm">CC</span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-white font-bold text-[15px] leading-tight">CohortConnect</p>
+                <p className="text-gray-500 text-xs capitalize truncate">{user?.role} account</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="lg:hidden text-gray-500 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-bold text-[15px] leading-tight">CohortConnect</p>
-            <p className="text-gray-500 text-xs capitalize truncate">{user?.role} account</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="lg:hidden text-gray-500 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+
+          <form onSubmit={handleSearch} className="relative hidden lg:block">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-          </button>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search posts, profiles..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-2xl pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+          </form>
         </div>
 
         {/* Scrollable nav */}

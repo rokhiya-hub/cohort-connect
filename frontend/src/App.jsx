@@ -9,13 +9,15 @@ import Leaderboard from './pages/Leaderboard';
 import AIStudio from './pages/AIStudio';
 import AdminPanel from './pages/AdminPanel';
 import Home from './pages/Home';
+import Categories from './pages/Categories';
+import MyPosts from './pages/MyPosts';
 import VideoFeed from './pages/VideoFeed';
-import MyVideos from './pages/MyVideos';
 import VideoUpload from './pages/VideoUpload';
 import Connect from './pages/Connect';
 import Messages from './pages/Messages';
 import StudyGroups from './pages/StudyGroups';
 import Doubts from './pages/Doubts';
+import Search from './pages/Search';
 import Layout from './components/layout/Layout';
 import Spinner from './components/common/Spinner';
 
@@ -51,17 +53,20 @@ function AppRoutes() {
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
       {/* Protected — main app */}
-      <Route path="/home" element={<P><Home /></P>} />
+      <Route path="/home" element={<P><Feed /></P>} />
       <Route path="/feed" element={<P><Feed /></P>} />
+      <Route path="/my-posts" element={<P><MyPosts /></P>} />
+      <Route path="/categories" element={<P><Categories /></P>} />
       <Route path="/profile" element={<P><Profile /></P>} />
       <Route path="/profile/:id" element={<P><Profile /></P>} />
       <Route path="/leaderboard" element={<P><Leaderboard /></P>} />
       <Route path="/ai-studio" element={<P><AIStudio /></P>} />
+      <Route path="/search" element={<P><Search /></P>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Layout><AdminPanel /></Layout></ProtectedRoute>} />
 
       {/* Videos */}
       <Route path="/videos" element={<P><VideoFeed /></P>} />
-      <Route path="/my-videos" element={<P><MyVideos /></P>} />
+      <Route path="/my-videos" element={<Navigate to="/my-posts" replace />} />
       <Route path="/upload" element={<P><VideoUpload /></P>} />
 
       {/* Connect & Chat */}

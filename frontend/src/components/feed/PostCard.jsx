@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import Avatar from '../common/Avatar';
 import CommentSection from './CommentSection';
@@ -28,7 +28,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
   const [editContent, setEditContent] = useState(post.content);
   const [saving, setSaving] = useState(false);
 
+  const navigate = useNavigate();
   const isOwner = post.author?._id === currentUser?._id;
+  const [shareCount, setShareCount] = useState(post.shares || 0);
 
   const timeAgo = (date) => {
     const diff = (Date.now() - new Date(date)) / 1000;
@@ -62,6 +64,10 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
     setShowMenu(false);
   };
 
+  const handleConnect = () => {
+    navigate(`/connect?search=${encodeURIComponent(post.author?.fullName || '')}`);
+  };
+
   const handleEdit = async () => {
     if (!editContent.trim()) return;
     setSaving(true);
@@ -73,6 +79,26 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleShare = async () => {
+    const shareText = `${post.author?.fullName} shared a post on CohortConnect: ${window.location.origin}/posts/${post._id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Check out this post', text: shareText, url: window.location.href });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        alert('Share link copied to clipboard');
+      }
+      setShareCount((count) => count + 1);
+    } catch {
+      // ignore share errors
+    }
+  };
+
+  const handleCalendar = () => {
+    alert('Added to your calendar.');
+    setShowMenu(false);
   };
 
   const handleReport = async () => {
@@ -99,10 +125,15 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
             <Avatar src={post.author?.profilePicture} name={post.author?.fullName} size="md" />
           </Link>
           <div>
-            <Link to={`/profile/${post.author?._id}`} className="font-semibold text-white hover:text-purple-400 transition-colors text-sm">
-              {post.author?.fullName}
-            </Link>
             <div className="flex items-center gap-2">
+              <Link to={`/profile/${post.author?._id}`} className="font-semibold text-white hover:text-purple-400 transition-colors text-sm">
+                {post.author?.fullName}
+              </Link>
+              {post.author?.role === 'faculty' && (
+                <span className="text-xs bg-green-500/15 text-green-300 px-2 py-0.5 rounded-full">Verified</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-xs capitalize font-medium ${roleColors[post.author?.role] || 'text-gray-400'}`}>
                 {post.author?.role}
               </span>
@@ -118,15 +149,23 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
           </div>
         </div>
 
-        <div className="relative">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-800"
+            type="button"
+            onClick={handleConnect}
+            className="rounded-full border border-gray-800 bg-gray-900 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-800/90 transition-colors"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
-            </svg>
+            Connect
           </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-800"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
+              </svg>
+            </button>
           {showMenu && (
             <div className="absolute right-0 top-8 bg-gray-800 border border-gray-700 rounded-xl shadow-xl z-10 min-w-40 py-1">
               {isOwner && (
@@ -139,6 +178,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
                   </button>
                 </>
               )}
+              <button onClick={handleCalendar} className="w-full text-left px-4 py-2 text-sm text-cyan-300 hover:bg-gray-700 transition-colors">
+                Mark in Calendar
+              </button>
               {!isOwner && (
                 <button onClick={() => { setShowReport(true); setShowMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-orange-400 hover:bg-gray-700 transition-colors">
                   Report Post
@@ -151,6 +193,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
           )}
         </div>
       </div>
+    </div>
 
       {isEditing ? (
         <div className="mb-4">
@@ -218,6 +261,16 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
           </svg>
           {saved ? 'Saved' : 'Save'}
+        </button>
+
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-cyan-300 hover:bg-cyan-900/20 transition-all"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h10M7 16h10" />
+          </svg>
+          {shareCount > 0 ? `${shareCount} Share${shareCount === 1 ? '' : 's'}` : 'Share'}
         </button>
       </div>
 

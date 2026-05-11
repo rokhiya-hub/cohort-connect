@@ -16,6 +16,7 @@ const reportSchema = new mongoose.Schema(
       default: 'pending',
     },
     moderatorNote: { type: String, default: '' },
+    penaltyApplied: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

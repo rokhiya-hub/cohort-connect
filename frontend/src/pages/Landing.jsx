@@ -13,18 +13,20 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Navbar */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-lg">CC</div>
-          <span className="font-bold text-xl">CohortConnect</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800">
-            Login
-          </Link>
-          <Link to="/signup" className="px-4 py-2 text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
-            Sign Up
-          </Link>
+      <nav className="sticky top-0 z-50 border-b border-gray-800 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-gray-950/80">
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-lg">CC</div>
+            <span className="font-bold text-xl">CohortConnect</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/login" className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800">
+              Login
+            </Link>
+            <Link to="/signup" className="px-4 py-2 text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+              Sign Up
+            </Link>
+          </div>
         </div>
       </nav>
 

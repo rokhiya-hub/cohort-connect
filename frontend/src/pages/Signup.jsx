@@ -9,7 +9,25 @@ const ROLES = [
   { value: 'admin', label: 'Admin', emoji: '🛠️', desc: 'Full platform management' },
 ];
 
-function Field({ label, name, type = 'text', placeholder, required, form, errors, set }) {
+const DEPARTMENTS = ['CSE', 'ECE', 'EEE', 'Mechanical', 'Civil', 'Chemical', 'Biomedical', 'MBA', 'Other'];
+const YEARS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Postgraduate'];
+const SEMESTERS = ['1st Sem', '2nd Sem', '3rd Sem', '4th Sem', '5th Sem', '6th Sem', '7th Sem', '8th Sem'];
+
+const COLLEGE_MAPPING = {
+  'ACET': '@acet.ac.in',
+  'Aditya University': '@adityauniversity.in',
+  'Pragati': '@pragati.ac.in',
+  'IIT Delhi': '@iitd.ac.in',
+  'IIT Madras': '@iitm.ac.in',
+  'IIT Bombay': '@iitb.ac.in',
+  'IIT Kanpur': '@iitk.ac.in',
+  'IIT Guwahati': '@iitg.ac.in',
+  'Delhi Technological University': '@dtu.ac.in',
+};
+
+const COLLEGE_NAMES = Object.keys(COLLEGE_MAPPING);
+
+function Field({ label, name, type = 'text', placeholder, required, form, errors, set, subText }) {
   return (
     <div>
       <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'}</label>
@@ -21,6 +39,91 @@ function Field({ label, name, type = 'text', placeholder, required, form, errors
         className={`w-full bg-gray-800 border rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none transition-colors ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
       />
       {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+      {subText && !errors[name] && <p className="text-xs text-gray-500 mt-1">{subText}</p>}
+    </div>
+  );
+}
+
+function PasswordField({ label, name, placeholder, required, form, errors, set, showPassword, setShowPassword }) {
+  const isPasswordField = name === 'password';
+  return (
+    <div>
+      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'}</label>
+      <div className="relative">
+        <input
+          type={showPassword[name] ? 'text' : 'password'}
+          value={form[name]}
+          onChange={(e) => set(name, e.target.value)}
+          placeholder={placeholder}
+          className={`w-full bg-gray-800 border rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none transition-colors ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+        />
+        {isPasswordField && (
+          <button
+            type="button"
+            onClick={() => setShowPassword({ ...showPassword, [name]: !showPassword[name] })}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1"
+            title={showPassword[name] ? 'Hide password' : 'Show password'}
+          >
+            {showPassword[name] ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-14-14zM10 4.5c3.59 0 6.748 2.045 8.268 5-.336.666-.763 1.287-1.265 1.855l-2.318-2.318a3 3 0 01-4 4l-2.318-2.318A9.956 9.956 0 0110 4.5zM2.732 7.732A9.957 9.957 0 0110 3c3.59 0 6.748 2.045 8.268 5a10.02 10.02 0 01-1.265 1.855l-2.318-2.318A3 3 0 107.732 9.732l-2.318-2.318z" clipRule="evenodd" />
+              </svg>
+            )}
+          </button>
+        )}
+      </div>
+      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+      {!errors[name] && name === 'password' && (
+        <div className="text-xs text-gray-500 mt-2 space-y-1">
+          <div className={form.password.length >= 8 ? 'text-green-400' : 'text-gray-500'}>✓ At least 8 characters</div>
+          <div className={/[a-z]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Lowercase letter</div>
+          <div className={/[A-Z]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Uppercase letter</div>
+          <div className={/[0-9]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Number</div>
+          <div className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password) ? 'text-green-400' : 'text-gray-500'}>✓ Special character</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SelectField({ label, name, options, required, form, errors, set }) {
+  return (
+    <div>
+      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'}</label>
+      <select
+        value={form[name]}
+        onChange={(e) => set(name, e.target.value)}
+        className={`w-full bg-gray-800 border rounded-xl px-4 py-3 text-white text-sm focus:outline-none transition-colors ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+      >
+        <option value="">Select {label.toLowerCase()}</option>
+        {options.map((opt) => (
+          <option key={opt.value || opt} value={opt.value || opt}>{opt.label || opt}</option>
+        ))}
+      </select>
+      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
+    </div>
+  );
+}
+
+function TextAreaField({ label, name, placeholder, required, form, errors, set, maxChars }) {
+  const charCount = form[name]?.length || 0;
+  return (
+    <div>
+      <label className="block text-sm text-gray-400 mb-1.5">{label}{required && ' *'} {maxChars && `(${charCount}/${maxChars})`}</label>
+      <textarea
+        value={form[name]}
+        onChange={(e) => set(name, e.target.value.slice(0, maxChars))}
+        placeholder={placeholder}
+        maxLength={maxChars}
+        className={`w-full bg-gray-800 border rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none transition-colors resize-none ${errors[name] ? 'border-red-500' : 'border-gray-700 focus:border-purple-500'}`}
+        rows="3"
+      />
+      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
     </div>
   );
 }
@@ -29,26 +132,118 @@ export default function Signup() {
   const [step, setStep] = useState(1);
   const [role, setRole] = useState('');
   const [form, setForm] = useState({
-    fullName: '', email: '', password: '', confirmPassword: '',
-    institution: '', branch: '', year: '', department: '', designation: '', adminCode: '',
+    fullName: '',
+    college: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    department: '',
+    branch: '',
+    branchOther: '',
+    year: '',
+    semester: '',
+    rollNumber: '',
+    bio: '',
+    studentType: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [showPassword, setShowPassword] = useState({ password: false, confirmPassword: false });
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k, v) => setForm((f) => {
+    const updated = { ...f, [k]: v };
+    if (k === 'branch' && v !== 'Other') {
+      updated.branchOther = '';
+    }
+    return updated;
+  });
+
+  const getDomainFromCollege = (college) => {
+    return COLLEGE_MAPPING[college] || null;
+  };
+
+  const validateEmailForCollege = (email, college) => {
+    const domain = getDomainFromCollege(college);
+    return domain && email.endsWith(domain);
+  };
+
+  const validatePassword = (pwd) => {
+    const hasLower = /[a-z]/.test(pwd);
+    const hasUpper = /[A-Z]/.test(pwd);
+    const hasNumber = /[0-9]/.test(pwd);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
+    const isLongEnough = pwd.length >= 8;
+    return hasLower && hasUpper && hasNumber && hasSpecial && isLongEnough;
+  };
 
   const validateStep2 = () => {
     const e = {};
-    if (!form.fullName.trim()) e.fullName = 'Full name is required';
-    if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Valid email required';
-    if (form.password.length < 6) e.password = 'Password must be at least 6 characters';
-    if (form.password !== form.confirmPassword) e.confirmPassword = 'Passwords do not match';
-    if (role === 'student' && !form.institution.trim()) e.institution = 'Institution is required';
-    if (role === 'faculty' && !form.department.trim()) e.department = 'Department is required';
-    if (role === 'admin' && !form.adminCode.trim()) e.adminCode = 'Admin code is required';
+
+    // College validation
+    if (!form.college) {
+      e.college = 'College is required';
+    }
+
+    // Full Name validation
+    if (!form.fullName.trim()) {
+      e.fullName = 'Full name is required';
+    } else if (form.fullName.length < 3) {
+      e.fullName = 'Full name must be at least 3 characters';
+    } else if (/[^a-zA-Z\s]/.test(form.fullName)) {
+      e.fullName = 'Full name cannot contain special symbols';
+    }
+
+    // Email validation
+    if (!form.email.trim()) {
+      e.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      e.email = 'Valid email required';
+    } else if (!form.college) {
+      e.college = 'Please select your college first';
+    } else if (!validateEmailForCollege(form.email, form.college)) {
+      const domain = getDomainFromCollege(form.college);
+      e.email = domain ? `Email must end with ${domain}` : 'Invalid email for selected college';
+    }
+
+    // Password validation
+    if (!form.password) {
+      e.password = 'Password is required';
+    } else if (!validatePassword(form.password)) {
+      e.password = 'Password must have 8+ chars, uppercase, lowercase, number & special char';
+    }
+
+    // Branch validation for students
+    if (role === 'student') {
+      if (!form.branch) {
+        e.branch = 'Branch is required';
+      } else if (form.branch === 'Other' && !form.branchOther.trim()) {
+        e.branchOther = 'Please enter your branch name';
+      }
+    }
+
+    // Confirm password validation
+    if (!form.confirmPassword) {
+      e.confirmPassword = 'Please confirm your password';
+    } else if (form.password !== form.confirmPassword) {
+      e.confirmPassword = 'Passwords do not match';
+    }
+
+    // Role-specific validations
+    if (role === 'student') {
+      if (!form.department) e.department = 'Department is required';
+      if (!form.year) e.year = 'Year of study is required';
+      if (!form.semester) e.semester = 'Semester is required';
+      if (!form.rollNumber.trim()) {
+        e.rollNumber = 'Roll number is required';
+      } else if (!/^[a-zA-Z0-9]+$/.test(form.rollNumber)) {
+        e.rollNumber = 'Roll number can only contain letters and numbers';
+      }
+      if (!form.studentType) e.studentType = 'Please select Junior or Senior';
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -59,7 +254,12 @@ export default function Signup() {
     setLoading(true);
     setApiError('');
     try {
-      await register({ ...form, role });
+      await register({
+        ...form,
+        role,
+        institution: form.college,
+        branch: form.branch === 'Other' ? form.branchOther.trim() : form.branch,
+      });
       navigate('/feed');
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Registration failed';
@@ -76,7 +276,7 @@ export default function Signup() {
         <span className="font-bold text-xl text-white">CohortConnect</span>
       </Link>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 w-full max-w-lg">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {step === 1 ? (
           <>
             <h1 className="text-2xl font-bold text-white mb-2">Create your account</h1>
@@ -120,7 +320,7 @@ export default function Signup() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">Fill in your details</h1>
+                <h1 className="text-2xl font-bold text-white">Complete Your Profile</h1>
                 <p className="text-sm text-gray-400">Registering as <span className="text-purple-400 capitalize">{role}</span></p>
               </div>
             </div>
@@ -132,36 +332,193 @@ export default function Signup() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Field label="Full Name" name="fullName" placeholder="John Doe" required form={form} errors={errors} set={set} />
-              <Field label="Email" name="email" type="email" placeholder="you@university.edu" required form={form} errors={errors} set={set} />
-              <Field label="Password" name="password" type="password" placeholder="Min 6 characters" required form={form} errors={errors} set={set} />
-              <Field label="Confirm Password" name="confirmPassword" type="password" placeholder="Repeat password" required form={form} errors={errors} set={set} />
+              {/* Common Fields */}
+              <Field
+                label="Full Name"
+                name="fullName"
+                placeholder="John Doe"
+                required
+                form={form}
+                errors={errors}
+                set={set}
+                subText="No special symbols allowed"
+              />
 
+              <SelectField
+                label="College"
+                name="college"
+                options={COLLEGE_NAMES}
+                required
+                form={form}
+                errors={errors}
+                set={set}
+              />
+
+              <Field
+                label="College Email"
+                name="email"
+                type="email"
+                placeholder={`you${getDomainFromCollege(form.college) || '@domain.com'}`}
+                required
+                form={form}
+                errors={errors}
+                set={set}
+                subText={form.college ? `Must end with ${getDomainFromCollege(form.college)}` : 'Select college first'}
+              />
+
+              <PasswordField
+                label="Password"
+                name="password"
+                placeholder="Min 8 chars with uppercase, lowercase, number & special char"
+                required
+                form={form}
+                errors={errors}
+                set={set}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+              />
+
+              <PasswordField
+                label="Confirm Password"
+                name="confirmPassword"
+                placeholder="Repeat password"
+                required
+                form={form}
+                errors={errors}
+                set={set}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+              />
+
+              {/* Student-Specific Fields */}
               {role === 'student' && (
                 <>
-                  <Field label="University / Institution" name="institution" placeholder="MIT, Stanford, IIT Delhi..." required form={form} errors={errors} set={set} />
-                  <Field label="Branch" name="branch" placeholder="CSE, ECE, IT..." form={form} errors={errors} set={set} />
-                  <Field label="Year / Semester" name="year" placeholder="3rd Year / 5th Semester" form={form} errors={errors} set={set} />
+                  <SelectField
+                    label="Department"
+                    name="department"
+                    options={DEPARTMENTS}
+                    required
+                    form={form}
+                    errors={errors}
+                    set={set}
+                  />
+
+                  <SelectField
+                    label="Branch"
+                    name="branch"
+                    options={[...DEPARTMENTS, 'Other']}
+                    required
+                    form={form}
+                    errors={errors}
+                    set={set}
+                  />
+
+                  {form.branch === 'Other' && (
+                    <Field
+                      label="Branch Name"
+                      name="branchOther"
+                      placeholder="Enter your branch name"
+                      required
+                      form={form}
+                      errors={errors}
+                      set={set}
+                    />
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <SelectField
+                      label="Year of Study"
+                      name="year"
+                      options={YEARS}
+                      required
+                      form={form}
+                      errors={errors}
+                      set={set}
+                    />
+
+                    <SelectField
+                      label="Semester"
+                      name="semester"
+                      options={SEMESTERS}
+                      required
+                      form={form}
+                      errors={errors}
+                      set={set}
+                    />
+                  </div>
+
+                  <Field
+                    label="Roll Number"
+                    name="rollNumber"
+                    placeholder="Your unique roll number"
+                    required
+                    form={form}
+                    errors={errors}
+                    set={set}
+                    subText="Used for institution verification"
+                  />
+
+                  <div className="space-y-3">
+                    <label className="block text-sm text-gray-400 mb-3">Student Type *</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['Junior', 'Senior'].map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => set('studentType', type)}
+                          className={`p-3 rounded-xl border transition-all text-center ${
+                            form.studentType === type ? 'border-purple-500 bg-purple-900/20' : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                          }`}
+                        >
+                          <p className="text-white font-semibold">{type}</p>
+                          <p className="text-xs text-gray-400">{type === 'Junior' ? '1st-2nd Year' : '3rd-4th Year'}</p>
+                        </button>
+                      ))}
+                    </div>
+                    {errors.studentType && <p className="text-red-400 text-xs">{errors.studentType}</p>}
+                  </div>
+
+                  <TextAreaField
+                    label="Bio"
+                    name="bio"
+                    placeholder="Tell us about yourself... (optional)"
+                    form={form}
+                    errors={errors}
+                    set={set}
+                    maxChars={200}
+                  />
                 </>
               )}
+
+              {/* Faculty-Specific Fields */}
               {role === 'faculty' && (
                 <>
-                  <Field label="Institution" name="institution" placeholder="Your university" form={form} errors={errors} set={set} />
-                  <Field label="Department" name="department" placeholder="Computer Science, EE..." required form={form} errors={errors} set={set} />
-                  <Field label="Designation" name="designation" placeholder="Professor, Associate Professor..." form={form} errors={errors} set={set} />
-                </>
-              )}
-              {role === 'admin' && (
-                <>
-                  <Field label="Organization" name="institution" placeholder="Your organization" form={form} errors={errors} set={set} />
-                  <Field label="Admin Code" name="adminCode" type="password" placeholder="Admin secret code" required form={form} errors={errors} set={set} />
+                  <SelectField
+                    label="Department"
+                    name="department"
+                    options={DEPARTMENTS}
+                    required
+                    form={form}
+                    errors={errors}
+                    set={set}
+                  />
+
+                  <TextAreaField
+                    label="Bio"
+                    name="bio"
+                    placeholder="Your academic background and research interests... (optional)"
+                    form={form}
+                    errors={errors}
+                    set={set}
+                    maxChars={200}
+                  />
                 </>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors mt-2"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors mt-6"
               >
                 {loading && <Spinner size="sm" />}
                 {loading ? 'Creating account...' : 'Create Account'}

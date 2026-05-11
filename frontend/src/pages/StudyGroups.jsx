@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+const STORAGE_KEY = 'cohort_connect_study_groups';
+const JOINED_KEY = 'cohort_connect_study_groups_joined';
+const SAMPLE_GROUP_IDS = new Set([1, 2, 3, 4, 5, 6]);
 
 const SAMPLE_GROUPS = [
   {
@@ -64,14 +67,15 @@ const SAMPLE_GROUPS = [
   },
 ];
 
-function GroupCard({ group, onJoin }) {
-  const [joined, setJoined] = useState(false);
+const GROUP_THEMES = [
+  { emoji: '📚', color: 'from-slate-900/40 to-slate-800/40', border: 'border-slate-800/40' },
+  { emoji: '🧠', color: 'from-indigo-900/40 to-violet-900/40', border: 'border-indigo-800/40' },
+  { emoji: '🛠️', color: 'from-orange-900/40 to-amber-900/40', border: 'border-orange-800/40' },
+  { emoji: '🌱', color: 'from-emerald-900/40 to-teal-900/40', border: 'border-emerald-800/40' },
+  { emoji: '🎯', color: 'from-fuchsia-900/40 to-pink-900/40', border: 'border-pink-800/40' },
+];
 
-  const handleJoin = () => {
-    setJoined((prev) => !prev);
-    onJoin(group.id, !joined);
-  };
-
+function GroupCard({ group, joined, onJoin }) {
   return (
     <div className={`bg-gradient-to-br ${group.color} border ${group.border} rounded-2xl p-5 hover:scale-[1.01] transition-transform`}>
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -79,11 +83,11 @@ function GroupCard({ group, onJoin }) {
           <span className="text-3xl">{group.emoji}</span>
           <div>
             <h3 className="text-white font-semibold text-sm leading-tight">{group.name}</h3>
-            <p className="text-gray-500 text-xs mt-0.5">{group.members} members</p>
+            <p className="text-gray-500 text-xs mt-0.5">{group.members.toLocaleString()} members</p>
           </div>
         </div>
         <button
-          onClick={handleJoin}
+          onClick={() => onJoin(group.id)}
           className={`text-xs font-semibold px-4 py-2 rounded-xl transition-all flex-shrink-0 ${
             joined
               ? 'bg-gray-700 text-gray-300 hover:bg-red-900/30 hover:text-red-400'
@@ -106,28 +110,101 @@ function GroupCard({ group, onJoin }) {
 }
 
 export default function StudyGroups() {
-  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [newGroup, setNewGroup] = useState({ name: '', desc: '', tags: '' });
+  const [groups, setGroups] = useState(SAMPLE_GROUPS);
   const [joined, setJoined] = useState({});
 
-  const filtered = SAMPLE_GROUPS.filter(
+  useEffect(() => {
+    const storedGroups = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const storedJoined = JSON.parse(localStorage.getItem(JOINED_KEY) || '{}');
+    const mergedGroups = Array.isArray(storedGroups) && storedGroups.length
+      ? [...storedGroups, ...SAMPLE_GROUPS]
+      : SAMPLE_GROUPS;
+
+    if (storedJoined && Object.keys(storedJoined).length) {
+      setGroups(
+        mergedGroups.map((group) => ({
+          ...group,
+          members:
+            SAMPLE_GROUP_IDS.has(group.id) && storedJoined[group.id]
+              ? group.members + 1
+              : group.members,
+        }))
+      );
+    } else {
+      setGroups(mergedGroups);
+    }
+
+    setJoined(storedJoined);
+  }, []);
+
+  const saveCreatedGroups = (nextGroups) => {
+    const createdGroups = nextGroups.filter((group) => !SAMPLE_GROUP_IDS.has(group.id));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(createdGroups));
+  };
+
+  const saveJoined = (nextJoined) => {
+    localStorage.setItem(JOINED_KEY, JSON.stringify(nextJoined));
+  };
+
+  const filteredGroups = groups.filter(
     (g) =>
       g.name.toLowerCase().includes(search.toLowerCase()) ||
       g.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleJoin = (id, isJoining) => {
-    setJoined((prev) => ({ ...prev, [id]: isJoining }));
+  const handleJoin = (id) => {
+    setJoined((prevJoined) => {
+      const nextJoined = { ...prevJoined, [id]: !prevJoined[id] };
+      saveJoined(nextJoined);
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          group.id === id
+            ? { ...group, members: group.members + (nextJoined[id] ? 1 : -1) }
+            : group
+        )
+      );
+      return nextJoined;
+    });
   };
+
+  const getTheme = () => GROUP_THEMES[Math.floor(Math.random() * GROUP_THEMES.length)];
 
   const handleCreate = (e) => {
     e.preventDefault();
+    const tags = newGroup.tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+    const theme = getTheme();
+    const id = Date.now();
+    const createdGroup = {
+      id,
+      name: newGroup.name.trim() || 'New Study Group',
+      emoji: theme.emoji,
+      desc: newGroup.desc.trim() || 'A new study community for learners.',
+      members: 1,
+      tags: tags.length ? tags : ['General'],
+      color: theme.color,
+      border: theme.border,
+    };
+
+    setGroups((prevGroups) => {
+      const nextGroups = [createdGroup, ...prevGroups];
+      saveCreatedGroups(nextGroups);
+      return nextGroups;
+    });
+
+    setJoined((prevJoined) => {
+      const nextJoined = { ...prevJoined, [id]: true };
+      saveJoined(nextJoined);
+      return nextJoined;
+    });
+
     setShowCreate(false);
     setNewGroup({ name: '', desc: '', tags: '' });
-    alert('Study group created! (Feature coming soon — groups will be fully persistent.)');
   };
+
+  const totalMembers = groups.reduce((sum, group) => sum + group.members, 0);
 
   return (
     <div className="space-y-6">
@@ -147,11 +224,10 @@ export default function StudyGroups() {
         </button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { emoji: '📖', label: 'Active Groups', value: SAMPLE_GROUPS.length },
-          { emoji: '👥', label: 'Total Members', value: SAMPLE_GROUPS.reduce((s, g) => s + g.members, 0).toLocaleString() },
+          { emoji: '📖', label: 'Active Groups', value: groups.length },
+          { emoji: '👥', label: 'Total Members', value: totalMembers.toLocaleString() },
           { emoji: '✅', label: 'You Joined', value: Object.values(joined).filter(Boolean).length },
         ].map((stat) => (
           <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
@@ -162,7 +238,6 @@ export default function StudyGroups() {
         ))}
       </div>
 
-      {/* Search */}
       <div className="relative">
         <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -176,21 +251,19 @@ export default function StudyGroups() {
         />
       </div>
 
-      {/* Groups grid */}
-      {filtered.length === 0 ? (
+      {filteredGroups.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <span className="text-5xl mb-4 block">📖</span>
           <p className="text-gray-400 font-medium">No groups match your search</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filtered.map((group) => (
-            <GroupCard key={group.id} group={group} onJoin={handleJoin} />
+          {filteredGroups.map((group) => (
+            <GroupCard key={group.id} group={group} joined={Boolean(joined[group.id])} onJoin={handleJoin} />
           ))}
         </div>
       )}
 
-      {/* Create Group Modal */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md">

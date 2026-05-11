@@ -1,6 +1,8 @@
 const express = require('express');
 const Comment = require('../models/Comment');
+const Post = require('../models/Post');
 const { protect } = require('../middleware/auth');
+const { addUserPoints } = require('../utils/points');
 
 const router = express.Router();
 
@@ -11,6 +13,12 @@ router.delete('/:id', protect, async (req, res) => {
     if (!comment) return res.status(404).json({ message: 'Comment not found' });
     if (comment.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized' });
+    }
+    if (!comment.isRemoved) {
+      const post = await Post.findById(comment.post);
+      if (post) {
+        await addUserPoints(post.author, -3);
+      }
     }
     comment.isRemoved = true;
     await comment.save();

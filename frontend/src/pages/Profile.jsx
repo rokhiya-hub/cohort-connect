@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,9 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [pwError, setPwError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const photoInputRef = useRef(null);
 
   const isOwnProfile = !id || id === currentUser?._id;
   const profileId = id || currentUser?._id;
@@ -64,6 +67,45 @@ export default function Profile() {
     }
   };
 
+  const readImageFile = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const handlePhotoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    try {
+      const dataUrl = await readImageFile(file);
+      setForm((f) => ({ ...f, profilePicture: dataUrl }));
+    } catch {
+      // ignore invalid image
+    }
+  };
+
+  const handlePhotoDrop = async (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    try {
+      const dataUrl = await readImageFile(file);
+      setForm((f) => ({ ...f, profilePicture: dataUrl }));
+    } catch {
+      // ignore invalid image
+    }
+  };
+
+  const handleAvatarClick = () => {
+    if (profile.profilePicture) {
+      setShowPhotoModal(true);
+    } else if (isOwnProfile) {
+      photoInputRef.current?.click();
+    }
+  };
+
   const handlePasswordChange = async () => {
     setPwError('');
     if (pwForm.newPassword !== pwForm.confirmNew) {
@@ -104,7 +146,9 @@ export default function Profile() {
       {/* Profile Header */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-4">
         <div className="flex items-start gap-5">
-          <Avatar src={profile.profilePicture} name={profile.fullName} size="xl" />
+          <button type="button" onClick={handleAvatarClick} className="rounded-full border border-gray-700 p-0.5 hover:border-indigo-500 transition-colors">
+            <Avatar src={profile.profilePicture} name={profile.fullName} size="xl" />
+          </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -142,8 +186,30 @@ export default function Profile() {
                 <p className="text-xs text-gray-500">Points</p>
               </div>
             </div>
+            <div className="mt-4 border-t border-gray-800 pt-4">
+              <p className="text-sm text-gray-400 uppercase tracking-[0.18em] mb-3">Connections</p>
+              {profile.connections?.length > 0 ? (
+                <div className="flex flex-wrap gap-2 items-center">
+                  {profile.connections.slice(0, 6).map((conn) => (
+                    <a key={conn._id} href={`/profile/${conn._id}`} className="flex items-center gap-2 bg-gray-950/70 border border-gray-800 rounded-2xl px-3 py-2 transition-colors hover:bg-gray-900">
+                      <Avatar src={conn.profilePicture} name={conn.fullName} size="sm" />
+                      <span className="text-xs text-gray-300">{conn.fullName}</span>
+                    </a>
+                  ))}
+                  {profile.connections.length > 6 && (
+                    <span className="text-xs text-gray-500">+{profile.connections.length - 6} more</span>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No connections added yet.</p>
+              )}
+            </div>
           </div>
         </div>
+
+        <Modal isOpen={showPhotoModal} onClose={() => setShowPhotoModal(false)} title="Profile Picture">
+          <img src={profile.profilePicture} alt={profile.fullName} className="w-full rounded-3xl object-contain" />
+        </Modal>
 
         {isOwnProfile && (
           <div className="flex gap-2 mt-4 pt-4 border-t border-gray-800">
@@ -167,6 +233,38 @@ export default function Profile() {
       <Modal isOpen={editing} onClose={() => setEditing(false)} title="Edit Profile" size="lg">
         {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
         <div className="space-y-4">
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handlePhotoDrop}
+            className={`w-full border rounded-3xl p-4 text-center transition-colors ${dragOver ? 'border-indigo-500 bg-indigo-900/30' : 'border-gray-700 bg-gray-950'}`}
+          >
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoSelect}
+            />
+            {form.profilePicture ? (
+              <img
+                src={form.profilePicture}
+                alt="Profile preview"
+                className="mx-auto max-h-40 rounded-3xl"
+              />
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-400">Drag & drop a profile picture here</p>
+                <button
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                  className="text-indigo-400 hover:text-indigo-300 text-sm font-semibold"
+                >
+                  Click to browse files
+                </button>
+              </div>
+            )}
+          </div>
           {[
             { label: 'Full Name', key: 'fullName' },
             { label: 'Username', key: 'username' },

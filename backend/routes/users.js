@@ -1,13 +1,16 @@
 const express = require('express');
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
+const { addUserPoints } = require('../utils/points');
 
 const router = express.Router();
 
 // GET /api/users/:id — public profile
 router.get('/:id', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password -adminCode');
+    const user = await User.findById(req.params.id)
+      .select('-password -adminCode')
+      .populate('connections', 'fullName profilePicture role institution branch year department designation');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch (err) {
@@ -52,6 +55,18 @@ router.put('/me/password', protect, async (req, res) => {
     user.password = newPassword;
     await user.save();
     res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/users/:id/warn — admin warning penalty
+router.put('/:id/warn', protect, adminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    await addUserPoints(user._id, -20);
+    res.json({ message: 'User warned and penalty applied' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -30,6 +30,7 @@ function ConversationItem({ conv, active, currentUserId, onClick }) {
 }
 
 function MessageBubble({ msg, isOwn }) {
+  const status = isOwn ? (msg.read ? 'Seen' : 'Delivered') : null;
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3`}>
       {!isOwn && (
@@ -48,9 +49,16 @@ function MessageBubble({ msg, isOwn }) {
         >
           {msg.content}
         </div>
-        <p className="text-gray-700 text-xs mt-1 px-1">
-          {new Date(msg.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-        </p>
+        <div className="flex items-center gap-2 mt-1 px-1">
+          <p className="text-gray-700 text-xs">
+            {new Date(msg.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+          {status && (
+            <span className="text-gray-400 text-[10px] uppercase tracking-[0.2em]">
+              {status}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

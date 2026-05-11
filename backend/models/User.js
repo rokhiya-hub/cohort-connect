@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema(
     username: { type: String, unique: true, trim: true },
     profilePicture: { type: String, default: '' },
     points: { type: Number, default: 0 },
+    pointsWeekly: { type: Number, default: 0 },
+    pointsMonthly: { type: Number, default: 0 },
+    weeklyReset: { type: Date, default: Date.now },
+    monthlyReset: { type: Date, default: Date.now },
 
     // Student fields
     institution: { type: String, trim: true },
@@ -30,6 +34,7 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     bio: { type: String, trim: true, maxlength: 500 },
 
+    connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true }

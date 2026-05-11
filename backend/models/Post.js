@@ -11,7 +11,9 @@ const postSchema = new mongoose.Schema(
     shares: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
     watchTime: { type: Number, default: 0 },
+    viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     isAIGenerated: { type: Boolean, default: false },
+    isVerifiedHelpful: { type: Boolean, default: false },
     isRemoved: { type: Boolean, default: false },
   },
   { timestamps: true }

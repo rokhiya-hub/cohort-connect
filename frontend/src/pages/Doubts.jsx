@@ -213,9 +213,11 @@ export default function Doubts() {
     );
   };
 
-  const filtered = activeTag
-    ? posts.filter((p) => p.content?.toLowerCase().includes('[doubt]'))
-    : posts.filter((p) => p.content?.toLowerCase().includes('[doubt]'));
+  const filtered = posts.filter((post) => {
+    const isDoubt = post.content?.toLowerCase().includes('[doubt]');
+    const matchesTag = activeTag ? post.tags?.includes(activeTag) : true;
+    return isDoubt && matchesTag;
+  });
 
   return (
     <div className="space-y-6">

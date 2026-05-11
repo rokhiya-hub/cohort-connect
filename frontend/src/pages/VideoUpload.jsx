@@ -495,7 +495,7 @@ export default function VideoUpload() {
     try {
       const tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean);
       await api.post('/videos', { ...form, tags });
-      navigate('/my-videos');
+      navigate('/my-posts');
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to save video');
     } finally {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
+const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 
 // GET /api/messages/conversations
@@ -22,6 +23,12 @@ router.post('/conversations', protect, async (req, res) => {
   try {
     const { participantId } = req.body;
     if (!participantId) return res.status(400).json({ message: 'participantId required' });
+    if (participantId === req.user.id.toString()) return res.status(400).json({ message: 'Cannot start a conversation with yourself' });
+
+    const currentUser = await User.findById(req.user.id).select('connections');
+    if (!currentUser.connections.some((id) => id.toString() === participantId)) {
+      return res.status(403).json({ message: 'You can only message connected users' });
+    }
 
     let conversation = await Conversation.findOne({
       participants: { $all: [req.user.id, participantId], $size: 2 },
@@ -45,6 +52,13 @@ router.get('/conversations/:id/messages', protect, async (req, res) => {
     if (!conversation.participants.map(String).includes(req.user.id.toString())) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
+
+    const otherParticipant = conversation.participants.find((p) => p.toString() !== req.user.id.toString());
+    const currentUser = await User.findById(req.user.id).select('connections');
+    if (otherParticipant && !currentUser.connections.some((id) => id.toString() === otherParticipant.toString())) {
+      return res.status(403).json({ message: 'You can only view conversations with connected users' });
+    }
+
     const messages = await Message.find({ conversation: req.params.id })
       .populate('sender', 'fullName profilePicture')
       .sort({ createdAt: 1 });
@@ -70,6 +84,12 @@ router.post('/conversations/:id/messages', protect, async (req, res) => {
     if (!conversation) return res.status(404).json({ message: 'Conversation not found' });
     if (!conversation.participants.map(String).includes(req.user.id.toString())) {
       return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const otherParticipant = conversation.participants.find((p) => p.toString() !== req.user.id.toString());
+    const currentUser = await User.findById(req.user.id).select('connections');
+    if (otherParticipant && !currentUser.connections.some((id) => id.toString() === otherParticipant.toString())) {
+      return res.status(403).json({ message: 'You can only message connected users' });
     }
 
     const message = await Message.create({ conversation: req.params.id, sender: req.user.id, content: content.trim() });
