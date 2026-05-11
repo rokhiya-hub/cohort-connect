@@ -62,7 +62,7 @@ export default function Home() {
   const [expandedSection, setExpandedSection] = useState(null);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-gray-800" >
       {/* Welcome banner */}
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-900/60 via-indigo-900/40 to-gray-900 border border-purple-800/30 p-8">
         <div className="relative z-10">

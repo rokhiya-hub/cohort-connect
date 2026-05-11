@@ -52,6 +52,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
     try {
       const res = await api.post(`/posts/${post._id}/save`);
       setSaved(res.data.saved);
+      onUpdate?.(res.data);
     } catch {}
   };
 
