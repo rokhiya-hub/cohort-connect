@@ -12,7 +12,7 @@ router.post(
   '/',
   protect,
   [
-    body('contentType').isIn(['post', 'comment', 'user']).withMessage('Invalid content type'),
+    body('contentType').isIn(['post', 'comment', 'user', 'video']).withMessage('Invalid content type'),
     body('contentId').notEmpty().withMessage('Content ID required'),
     body('reason')
       .isIn(['spam', 'harassment', 'hate_speech', 'nudity', 'misinformation', 'fraud', 'fake'])
