@@ -159,8 +159,7 @@ export default function Connect() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Find & Connect</h1>
-        <p className="text-gray-500 text-sm mt-0.5">Reach out to faculty, seniors, and peers for mentorship or collaboration</p>
+        <h1 className="text-2xl font-bold text-cyan-300">Find & Connect</h1>
       </div>
 
       {/* Mentorship tips */}

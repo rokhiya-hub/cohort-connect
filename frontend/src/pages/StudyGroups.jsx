@@ -210,7 +210,7 @@ export default function StudyGroups() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white">Study Groups</h1>
+          <h1 className="text-2xl font-bold text-cyan-300">Study Groups</h1>
           <p className="text-gray-500 text-sm mt-0.5">Join communities and study together</p>
         </div>
         <button

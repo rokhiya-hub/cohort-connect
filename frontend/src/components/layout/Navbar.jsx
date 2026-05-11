@@ -40,11 +40,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/feed" className="flex items-center gap-3" aria-label="CohortConnect home">
-            <img src="/logo.png" alt="CohortConnect logo" className="w-10 h-10 rounded-2xl bg-white shadow-sm object-cover" />
-            <div className="flex items-baseline gap-1">
-              <span className="text-slate-900 font-bold text-lg leading-none">Cohort</span>
-              <span className="text-cyan-600 font-bold text-lg leading-none">Connect</span>
-            </div>
+            <img src="/logo.png" alt="CohortConnect logo" className="w-12 h-12 rounded-2xl bg-white shadow-sm object-cover" />
           </Link>
 
           <div className="flex items-center gap-1">

@@ -59,7 +59,7 @@ export default function MyVideos() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Videos</h1>
+          <h1 className="text-2xl font-bold text-cyan-300">My Videos</h1>
           <p className="text-gray-500 text-sm mt-0.5">Manage the videos you've shared</p>
         </div>
         <Link

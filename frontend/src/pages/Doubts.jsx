@@ -223,7 +223,7 @@ export default function Doubts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-white">Ask a Doubt</h1>
+          <h1 className="text-2xl font-bold text-cyan-300">Ask a Doubt</h1>
           <p className="text-gray-500 text-sm mt-0.5">Post your questions and get answers from seniors & faculty</p>
         </div>
         <button

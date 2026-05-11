@@ -92,7 +92,7 @@ export default function Feed() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-6">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-white mb-1">Feed</h1>
+          <h1 className="text-2xl font-bold text-cyan-300 mb-1">Feed</h1>
           <p className="text-gray-400 text-sm">Latest posts from all users.</p>
         </div>
 
