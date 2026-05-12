@@ -9,6 +9,7 @@ const CATEGORIES = [
   { value: 'internships', label: '🚀 Internships' },
   { value: 'exam-prep', label: '📝 Exam Prep' },
   { value: 'resources', label: '📚 Resources' },
+  { value: 'career', label: '🎯 Career' },
   { value: 'events', label: '🎉 Events' },
   { value: 'tech-ai', label: '🤖 Tech & AI' },
 ];

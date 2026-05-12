@@ -82,7 +82,7 @@ export default function AdminPanel() {
       ) : (
         <div className="space-y-4">
           {reports.map((report) => (
-            <div key={report._id} className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+            <div key={report._id} className="bg-white border border-blue-200 rounded-2xl p-5 shadow-sm">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex items-center gap-3">
                   <Avatar src={report.reporter?.profilePicture} name={report.reporter?.fullName} size="sm" />

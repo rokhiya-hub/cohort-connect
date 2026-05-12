@@ -36,7 +36,7 @@ export default function PostCreator({ currentUser, onPost }) {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+    <div className="bg-white border border-blue-200 rounded-2xl p-5">
       <div className="flex gap-3">
         <Avatar src={currentUser?.profilePicture} name={currentUser?.fullName} size="md" />
         <div className="flex-1">

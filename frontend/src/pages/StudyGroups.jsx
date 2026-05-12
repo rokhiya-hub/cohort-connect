@@ -1,106 +1,33 @@
-import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'cohort_connect_study_groups';
-const JOINED_KEY = 'cohort_connect_study_groups_joined';
-const SAMPLE_GROUP_IDS = new Set([1, 2, 3, 4, 5, 6]);
-
-const SAMPLE_GROUPS = [
-  {
-    id: 1,
-    name: 'DSA & Competitive Programming',
-    emoji: '⚡',
-    desc: 'Daily problems, weekly contests, and interview prep for placements.',
-    members: 142,
-    tags: ['DSA', 'Leetcode', 'CP'],
-    color: 'from-indigo-900/40 to-blue-900/30',
-    border: 'border-indigo-800/40',
-  },
-  {
-    id: 2,
-    name: 'Placement Preparation 2025',
-    emoji: '💼',
-    desc: 'Resume reviews, mock interviews, and company-specific preparation.',
-    members: 98,
-    tags: ['Placements', 'Interviews', 'Resume'],
-    color: 'from-purple-900/40 to-violet-900/30',
-    border: 'border-purple-800/40',
-  },
-  {
-    id: 3,
-    name: 'GATE 2025 Aspirants',
-    emoji: '📝',
-    desc: 'Study notes, PYQs, and daily timetable for GATE preparation.',
-    members: 67,
-    tags: ['GATE', 'Exam Prep', 'Notes'],
-    color: 'from-green-900/40 to-emerald-900/30',
-    border: 'border-green-800/40',
-  },
-  {
-    id: 4,
-    name: 'Web Dev & Open Source',
-    emoji: '🌐',
-    desc: 'Building projects together, contributing to open source, and sharing resources.',
-    members: 115,
-    tags: ['Web Dev', 'Open Source', 'Projects'],
-    color: 'from-orange-900/40 to-amber-900/30',
-    border: 'border-orange-800/40',
-  },
-  {
-    id: 5,
-    name: 'AI & Machine Learning',
-    emoji: '🤖',
-    desc: 'Research papers, hands-on ML projects, and career paths in AI.',
-    members: 89,
-    tags: ['AI', 'ML', 'Deep Learning'],
-    color: 'from-pink-900/40 to-rose-900/30',
-    border: 'border-pink-800/40',
-  },
-  {
-    id: 6,
-    name: 'Internship Hunters',
-    emoji: '🚀',
-    desc: 'Find internship opportunities, share referrals, and prepare together.',
-    members: 204,
-    tags: ['Internships', 'Referrals', 'Experience'],
-    color: 'from-cyan-900/40 to-sky-900/30',
-    border: 'border-cyan-800/40',
-  },
-];
-
-const GROUP_THEMES = [
-  { emoji: '📚', color: 'from-slate-900/40 to-slate-800/40', border: 'border-slate-800/40' },
-  { emoji: '🧠', color: 'from-indigo-900/40 to-violet-900/40', border: 'border-indigo-800/40' },
-  { emoji: '🛠️', color: 'from-orange-900/40 to-amber-900/40', border: 'border-orange-800/40' },
-  { emoji: '🌱', color: 'from-emerald-900/40 to-teal-900/40', border: 'border-emerald-800/40' },
-  { emoji: '🎯', color: 'from-fuchsia-900/40 to-pink-900/40', border: 'border-pink-800/40' },
-];
+﻿import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 
 function GroupCard({ group, joined, onJoin }) {
   return (
-    <div className={`bg-gradient-to-br ${group.color} border ${group.border} rounded-2xl p-5 hover:scale-[1.01] transition-transform`}>
+    <div className="bg-[#111827] border border-cyan-500/20 rounded-2xl p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-lg shadow-cyan-500/10">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">{group.emoji}</span>
+          <span className="text-3xl">{group.emoji || 'Group'}</span>
           <div>
             <h3 className="text-white font-semibold text-sm leading-tight">{group.name}</h3>
-            <p className="text-gray-500 text-xs mt-0.5">{group.members.toLocaleString()} members</p>
+            <p className="text-gray-400 text-xs mt-0.5">{(group.members?.length || 0).toLocaleString()} members</p>
           </div>
         </div>
         <button
-          onClick={() => onJoin(group.id)}
+          onClick={() => onJoin(group._id)}
           className={`text-xs font-semibold px-4 py-2 rounded-xl transition-all flex-shrink-0 ${
             joined
               ? 'bg-gray-700 text-gray-300 hover:bg-red-900/30 hover:text-red-400'
-              : 'bg-indigo-600 text-white hover:bg-indigo-500'
+              : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'
           }`}
         >
-          {joined ? 'Joined ✓' : 'Join'}
+          {joined ? 'Joined' : 'Join'}
         </button>
       </div>
-      <p className="text-gray-400 text-xs leading-relaxed mb-4">{group.desc}</p>
+      <p className="text-gray-400 text-xs leading-relaxed mb-4">{group.description}</p>
       <div className="flex flex-wrap gap-1.5">
-        {group.tags.map((tag) => (
-          <span key={tag} className="bg-black/30 text-gray-400 text-xs px-2.5 py-0.5 rounded-full">
+        {(group.tags || []).map((tag) => (
+          <span key={tag} className="bg-white/5 text-gray-400 text-xs px-2.5 py-0.5 rounded-full">
             #{tag}
           </span>
         ))}
@@ -110,112 +37,88 @@ function GroupCard({ group, joined, onJoin }) {
 }
 
 export default function StudyGroups() {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [newGroup, setNewGroup] = useState({ name: '', desc: '', tags: '' });
-  const [groups, setGroups] = useState(SAMPLE_GROUPS);
-  const [joined, setJoined] = useState({});
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const storedGroups = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const storedJoined = JSON.parse(localStorage.getItem(JOINED_KEY) || '{}');
-    const mergedGroups = Array.isArray(storedGroups) && storedGroups.length
-      ? [...storedGroups, ...SAMPLE_GROUPS]
-      : SAMPLE_GROUPS;
+    const loadGroups = async () => {
+      setLoading(true);
+      setError('');
 
-    if (storedJoined && Object.keys(storedJoined).length) {
-      setGroups(
-        mergedGroups.map((group) => ({
-          ...group,
-          members:
-            SAMPLE_GROUP_IDS.has(group.id) && storedJoined[group.id]
-              ? group.members + 1
-              : group.members,
-        }))
-      );
-    } else {
-      setGroups(mergedGroups);
-    }
+      try {
+        const res = await api.get('/studygroups');
+        setGroups(res.data.groups || []);
+      } catch (err) {
+        setError('Unable to load study groups.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setJoined(storedJoined);
+    loadGroups();
   }, []);
 
-  const saveCreatedGroups = (nextGroups) => {
-    const createdGroups = nextGroups.filter((group) => !SAMPLE_GROUP_IDS.has(group.id));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(createdGroups));
+  const isJoined = (group) =>
+    Boolean(
+      group.members?.find((member) => String(member) === String(user?._id) || member?._id === user?._id)
+    );
+
+  const handleJoin = async (groupId) => {
+    try {
+      const res = await api.post(`/studygroups/${groupId}/join`);
+      const updatedGroup = res.data.group;
+      setGroups((prevGroups) => prevGroups.map((group) => (String(group._id) === String(groupId) ? updatedGroup : group)));
+    } catch (err) {
+      setError('Unable to update group membership.');
+    }
   };
 
-  const saveJoined = (nextJoined) => {
-    localStorage.setItem(JOINED_KEY, JSON.stringify(nextJoined));
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+
+    try {
+      const tags = newGroup.tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+      const res = await api.post('/studygroups', {
+        name: newGroup.name.trim(),
+        description: newGroup.desc.trim(),
+        tags,
+      });
+      setGroups((prevGroups) => [res.data.group, ...prevGroups]);
+      setShowCreate(false);
+      setNewGroup({ name: '', desc: '', tags: '' });
+    } catch (err) {
+      setError('Unable to create new group.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const filteredGroups = groups.filter(
-    (g) =>
-      g.name.toLowerCase().includes(search.toLowerCase()) ||
-      g.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
+    (group) =>
+      group.name.toLowerCase().includes(search.toLowerCase()) ||
+      (group.tags || []).some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleJoin = (id) => {
-    setJoined((prevJoined) => {
-      const nextJoined = { ...prevJoined, [id]: !prevJoined[id] };
-      saveJoined(nextJoined);
-      setGroups((prevGroups) =>
-        prevGroups.map((group) =>
-          group.id === id
-            ? { ...group, members: group.members + (nextJoined[id] ? 1 : -1) }
-            : group
-        )
-      );
-      return nextJoined;
-    });
-  };
-
-  const getTheme = () => GROUP_THEMES[Math.floor(Math.random() * GROUP_THEMES.length)];
-
-  const handleCreate = (e) => {
-    e.preventDefault();
-    const tags = newGroup.tags.split(',').map((tag) => tag.trim()).filter(Boolean);
-    const theme = getTheme();
-    const id = Date.now();
-    const createdGroup = {
-      id,
-      name: newGroup.name.trim() || 'New Study Group',
-      emoji: theme.emoji,
-      desc: newGroup.desc.trim() || 'A new study community for learners.',
-      members: 1,
-      tags: tags.length ? tags : ['General'],
-      color: theme.color,
-      border: theme.border,
-    };
-
-    setGroups((prevGroups) => {
-      const nextGroups = [createdGroup, ...prevGroups];
-      saveCreatedGroups(nextGroups);
-      return nextGroups;
-    });
-
-    setJoined((prevJoined) => {
-      const nextJoined = { ...prevJoined, [id]: true };
-      saveJoined(nextJoined);
-      return nextJoined;
-    });
-
-    setShowCreate(false);
-    setNewGroup({ name: '', desc: '', tags: '' });
-  };
-
-  const totalMembers = groups.reduce((sum, group) => sum + group.members, 0);
+  const totalMembers = groups.reduce((sum, group) => sum + (group.members?.length || 0), 0);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-cyan-300">Study Groups</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Join communities and study together</p>
+          <p className="text-gray-400 text-sm mt-0.5">Join communities and study together.</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2"
+          className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -224,13 +127,13 @@ export default function StudyGroups() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { emoji: '📖', label: 'Active Groups', value: groups.length },
-          { emoji: '👥', label: 'Total Members', value: totalMembers.toLocaleString() },
-          { emoji: '✅', label: 'You Joined', value: Object.values(joined).filter(Boolean).length },
+          { emoji: 'Groups', label: 'Active Groups', value: groups.length },
+          { emoji: 'Members', label: 'Total Members', value: totalMembers.toLocaleString() },
+          { emoji: 'Joined', label: 'You Joined', value: groups.filter(isJoined).length },
         ].map((stat) => (
-          <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+          <div key={stat.label} className="bg-[#111827] border border-slate-800 rounded-2xl p-4 text-center shadow-sm">
             <span className="text-2xl">{stat.emoji}</span>
             <p className="text-white font-bold text-xl mt-1">{stat.value}</p>
             <p className="text-gray-500 text-xs">{stat.label}</p>
@@ -246,27 +149,35 @@ export default function StudyGroups() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search groups by name or topic…"
-          className="w-full bg-gray-900 border border-gray-800 text-white placeholder-gray-600 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600 transition-colors"
+          placeholder="Search groups by name or topic..."
+          className="w-full bg-[#111827] border border-slate-800 text-white placeholder-gray-500 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
         />
       </div>
 
-      {filteredGroups.length === 0 ? (
+      {error && (
+        <div className="bg-red-900/20 border border-red-700/40 rounded-xl px-4 py-3 text-red-300 text-sm">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-16 text-gray-500">Loading study groups...</div>
+      ) : filteredGroups.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <span className="text-5xl mb-4 block">📖</span>
-          <p className="text-gray-400 font-medium">No groups match your search</p>
+          <span className="text-5xl mb-4 block">No results</span>
+          <p className="text-gray-400 font-medium">No groups match your search.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {filteredGroups.map((group) => (
-            <GroupCard key={group.id} group={group} joined={Boolean(joined[group.id])} onJoin={handleJoin} />
+            <GroupCard key={group._id} group={group} joined={isJoined(group)} onJoin={handleJoin} />
           ))}
         </div>
       )}
 
       {showCreate && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md">
+          <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h2 className="text-white font-bold text-lg mb-5">Create Study Group</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
@@ -277,7 +188,7 @@ export default function StudyGroups() {
                   onChange={(e) => setNewGroup((p) => ({ ...p, name: e.target.value }))}
                   placeholder="e.g. GATE 2026 Aspirants"
                   required
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
+                  className="w-full bg-[#111827] border border-slate-800 text-white placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"
                 />
               </div>
               <div>
@@ -287,7 +198,7 @@ export default function StudyGroups() {
                   onChange={(e) => setNewGroup((p) => ({ ...p, desc: e.target.value }))}
                   placeholder="What is this group about?"
                   rows={3}
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600 resize-none"
+                  className="w-full bg-[#111827] border border-slate-800 text-white placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500 resize-none"
                 />
               </div>
               <div>
@@ -296,15 +207,23 @@ export default function StudyGroups() {
                   type="text"
                   value={newGroup.tags}
                   onChange={(e) => setNewGroup((p) => ({ ...p, tags: e.target.value }))}
-                  placeholder="DSA, Placement, Notes (comma separated)"
-                  className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600"
+                  placeholder="DSA, Placement, Notes"
+                  className="w-full bg-[#111827] border border-slate-800 text-white placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500"
                 />
               </div>
               <div className="flex gap-3 pt-1">
-                <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
-                  Create Group
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60"
+                >
+                  {saving ? 'Creating...' : 'Create Group'}
                 </button>
-                <button type="button" onClick={() => setShowCreate(false)} className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(false)}
+                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-gray-300 rounded-xl text-sm transition-colors"
+                >
                   Cancel
                 </button>
               </div>

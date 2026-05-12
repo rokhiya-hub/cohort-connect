@@ -119,7 +119,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }) {
   const roleColors = { student: 'text-blue-400', faculty: 'text-green-400', admin: 'text-red-400' };
 
   return (
-    <article className="bg-gray-900 border border-gray-800 rounded-2xl p-5 transition-all hover:border-gray-700">
+    <article className="bg-white border border-blue-200 rounded-2xl p-5 transition-all hover:border-blue-300 shadow-sm hover:shadow-md">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <Link to={`/profile/${post.author?._id}`}>

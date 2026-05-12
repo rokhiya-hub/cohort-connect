@@ -7,7 +7,7 @@ const videoSchema = new mongoose.Schema({
   thumbnail: { type: String, default: '' },
   category: {
     type: String,
-    enum: ['interviews', 'internships', 'exam-prep', 'resources', 'events', 'tech-ai', 'general'],
+    enum: ['interviews', 'internships', 'exam-prep', 'resources', 'events', 'tech-ai', 'career', 'general'],
     default: 'general',
   },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

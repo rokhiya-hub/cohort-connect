@@ -20,6 +20,8 @@ const videoRoutes = require('./routes/videos');
 const messageRoutesFactory = require('./routes/messages');
 const connectionRoutes = require('./routes/connections');
 const uploadRoutes = require('./routes/upload');
+const analyticsRoutes = require('./routes/analytics');
+const studyGroupsRoutes = require('./routes/studygroups');
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +33,15 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
 io.use(async (socket, next) => {
   const authHeader = socket.handshake.headers?.authorization;
@@ -87,6 +98,9 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/messages', messageRoutesFactory(io));
 app.use('/api/connections', connectionRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/studygroups', studyGroupsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

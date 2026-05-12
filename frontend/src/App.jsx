@@ -19,6 +19,7 @@ import Messages from './pages/Messages';
 import StudyGroups from './pages/StudyGroups';
 import Doubts from './pages/Doubts';
 import Search from './pages/Search';
+import Analytics from './pages/Analytics';
 import Layout from './components/layout/Layout';
 import Spinner from './components/common/Spinner';
 
@@ -63,6 +64,7 @@ function AppRoutes() {
       <Route path="/profile/:id" element={<P><Profile /></P>} />
       <Route path="/leaderboard" element={<P><Leaderboard /></P>} />
       <Route path="/ai-studio" element={<P><AIStudio /></P>} />
+      <Route path="/analytics" element={<P><Analytics /></P>} />
       <Route path="/search" element={<P><Search /></P>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Layout><AdminPanel /></Layout></ProtectedRoute>} />
 

@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { execSync } = require('child_process');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -50,6 +51,21 @@ router.post('/video', protect, (req, res) => {
     }
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded.' });
+    }
+
+    try {
+      const duration = parseFloat(
+        execSync(`ffprobe -v error -show_entries format=duration -of csv=p=0 "${req.file.path}"`).toString()
+      );
+      if (!Number.isFinite(duration) || duration > 60) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ message: 'Video must be under 60 seconds.' });
+      }
+    } catch (err) {
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ message: 'Unable to verify video duration. Please upload a valid video under 60 seconds.' });
     }
 
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;

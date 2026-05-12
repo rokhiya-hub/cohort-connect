@@ -16,13 +16,6 @@ const SEMESTERS = ['1st Sem', '2nd Sem', '3rd Sem', '4th Sem', '5th Sem', '6th S
 const COLLEGE_MAPPING = {
   'ACET': '@acet.ac.in',
   'Aditya University': '@adityauniversity.in',
-  'Pragati': '@pragati.ac.in',
-  'IIT Delhi': '@iitd.ac.in',
-  'IIT Madras': '@iitm.ac.in',
-  'IIT Bombay': '@iitb.ac.in',
-  'IIT Kanpur': '@iitk.ac.in',
-  'IIT Guwahati': '@iitg.ac.in',
-  'Delhi Technological University': '@dtu.ac.in',
 };
 
 const COLLEGE_NAMES = Object.keys(COLLEGE_MAPPING);
@@ -279,9 +272,9 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center px-4 py-8">
-      <Link to="/" className="flex items-center gap-2 mb-8">
-        <div className="w-60 h-25 rounded-xl ">
-        <img src="/logo.png" alt="CohortConnect logo" />
+      <Link to="/" className="flex items-center justify-center mb-8">
+        <div className="w-24 h-24 rounded-3xl overflow-hidden bg-white/90 border border-blue-200 shadow-md shadow-blue-200/20 flex items-center justify-center">
+          <img src="/logo.png" alt="CohortConnect logo" className="w-16 h-16 object-contain" />
         </div>
       </Link>
 

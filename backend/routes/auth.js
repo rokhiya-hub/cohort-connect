@@ -5,7 +5,8 @@ const { protect, generateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'cohort-admin-2024';
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+if (!ADMIN_SECRET) throw new Error('ADMIN_SECRET environment variable is required');
 
 router.post(
   '/register',

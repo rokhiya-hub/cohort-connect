@@ -5,6 +5,7 @@ const categories = [
   { label: 'Internships', path: '/videos?category=internships' },
   { label: 'Exam Prep', path: '/videos?category=exam-prep' },
   { label: 'Resources', path: '/videos?category=resources' },
+  { label: 'Career', path: '/videos?category=career' },
   { label: 'Events', path: '/videos?category=events' },
   { label: 'Tech & AI', path: '/videos?category=tech-ai' },
   { label: 'Other', path: '/videos?category=other' },
@@ -23,7 +24,7 @@ export default function Categories() {
           <Link
             key={category.label}
             to={category.path}
-            className="group block rounded-3xl border border-gray-800 bg-gray-900 p-6 hover:border-indigo-500/40 hover:bg-gray-800 transition-all"
+            className="group block rounded-3xl border border-blue-200 bg-white p-6 hover:border-blue-300 hover:shadow-md transition-all shadow-sm"
           >
             <div className="text-sm uppercase tracking-[0.2em] text-indigo-300 mb-3">Category</div>
             <h2 className="text-lg font-semibold text-white">{category.label}</h2>

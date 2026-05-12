@@ -27,15 +27,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center px-4">
-      <Link to="/" className="flex items-center gap-2 mb-8">
-        <div className="w-60 h-25 rounded-xl ">
-        <img src="/logo.png" alt="CohortConnect logo" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="flex justify-center mb-4">
+          <img src="/logo.png" alt="CohortConnect logo" className="h-20 object-contain" />
         </div>
-      </Link>
-
-      <div className="bg-white border border-blue-200 rounded-2xl p-8 w-full max-w-md shadow-lg shadow-blue-500/10">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
+        <div className="bg-white border border-blue-200 rounded-2xl p-8 shadow-lg shadow-blue-500/10">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
         <p className="text-gray-600 text-sm mb-6">Sign in to your account</p>
 
         {error && (
@@ -104,6 +102,7 @@ export default function Login() {
             Sign up
           </Link>
         </p>
+        </div>
       </div>
     </div>
   );

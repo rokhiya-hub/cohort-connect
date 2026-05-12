@@ -41,7 +41,7 @@ function DoubtCard({ post, onLike, currentUserId }) {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-gray-700 transition-colors">
+    <div className="bg-white border border-blue-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-md transition-colors shadow-sm">
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
         <Avatar src={post.author?.profilePicture} name={post.author?.fullName} size="sm" />
@@ -239,7 +239,7 @@ export default function Doubts() {
 
       {/* Ask form */}
       {showForm && (
-        <form onSubmit={handlePost} className="bg-gray-900 border border-indigo-700/30 rounded-2xl p-5 space-y-4">
+        <form onSubmit={handlePost} className="bg-white border border-blue-200 rounded-2xl p-5 space-y-4 shadow-sm">
           <h3 className="text-white font-semibold text-sm">❓ Post Your Doubt</h3>
           <textarea
             value={content}

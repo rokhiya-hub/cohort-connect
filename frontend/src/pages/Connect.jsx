@@ -14,7 +14,7 @@ const ROLE_FILTERS = [
 
 function UserCard({ user, connected, connecting, onConnect, onMessage }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-indigo-600/30 transition-all">
+    <div className="bg-white border border-blue-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-md transition-all shadow-sm">
       <div className="flex items-start gap-4">
         <Avatar src={user.profilePicture} name={user.fullName} size="md" />
         <div className="flex-1 min-w-0">

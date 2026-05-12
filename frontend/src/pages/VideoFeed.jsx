@@ -10,6 +10,7 @@ const CATEGORIES = [
   { value: 'internships', label: 'Internships', emoji: '🚀' },
   { value: 'exam-prep', label: 'Exam Prep', emoji: '📝' },
   { value: 'resources', label: 'Resources', emoji: '📚' },
+  { value: 'career', label: 'Career', emoji: '🎯' },
   { value: 'events', label: 'Events', emoji: '🎉' },
   { value: 'tech-ai', label: 'Tech & AI', emoji: '🤖' },
 ];

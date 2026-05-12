@@ -3,6 +3,13 @@ const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 const { getLeaderboardField, startOfWeek, startOfMonth } = require('../utils/points');
 
+const getTier = (xp) => {
+  if (xp >= 5000) return { tier: 'Diamond', badge: '💎' };
+  if (xp >= 2000) return { tier: 'Gold', badge: '🥇' };
+  if (xp >= 800) return { tier: 'Silver', badge: '🥈' };
+  return { tier: 'Bronze', badge: '🥉' };
+};
+
 const router = express.Router();
 
 // GET /api/leaderboard
@@ -29,17 +36,23 @@ router.get('/', protect, async (req, res) => {
       .limit(limit)
       .select('fullName username profilePicture role points pointsWeekly pointsMonthly institution department branch');
 
-    const ranked = users.map((user, index) => ({
-      rank: index + 1,
-      _id: user._id,
-      fullName: user.fullName,
-      username: user.username,
-      profilePicture: user.profilePicture,
-      role: user.role,
-      points: user[field] || 0,
-      institution: user.institution || user.department,
-      branch: user.branch,
-    }));
+    const ranked = users.map((user, index) => {
+      const xp = user[field] || 0;
+      const tier = getTier(xp);
+      return {
+        rank: index + 1,
+        _id: user._id,
+        fullName: user.fullName,
+        username: user.username,
+        profilePicture: user.profilePicture,
+        role: user.role,
+        points: xp,
+        institution: user.institution || user.department,
+        branch: user.branch,
+        tier: tier.tier,
+        badge: tier.badge,
+      };
+    });
 
     const currentUser = await User.findById(req.user._id).select(field);
     let currentUserRank = null;
